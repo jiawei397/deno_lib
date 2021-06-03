@@ -1,0 +1,17 @@
+# 使用denon dev启动服务
+scripts:
+  example:
+    cmd: "deno run examples/demo.ts"
+    desc: "run example demo.ts file"
+    allow:
+      - read
+    unstable: true
+    lock: lock.json
+    log: info
+    watch: false
+  test:
+    cmd: "deno test test/unit.ts"
+    allow:
+      - read
+    unstable: true
+    watch: false
