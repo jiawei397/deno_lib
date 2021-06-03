@@ -51,17 +51,14 @@ renderFile(
 - Static caching of templates
 - Complies with the [Express](http://expressjs.com) view system
 
-## Example
+## Basic usage
 
 ```ejs
 <% if (user) { %>
   <h2><%= user.name %></h2>
 <% } %>
 ```
-
 Try EJS online at: https://ionicabizau.github.io/ejs-playground/.
-
-## Basic usage
 
 ```javascript
 let template = ejs.compile(str, options);
