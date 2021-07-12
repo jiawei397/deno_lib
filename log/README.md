@@ -1,9 +1,11 @@
-# dateFile logs
+# date_file_log
+
+everyday will generate a new log file.
 
 ## examples
 
 ``` ts
-import { DateFileLogConfig, getLogger, init } from "../mod.ts";
+import { DateFileLogConfig, getLogger, initLog } from "../mod.ts";
 
 const config: DateFileLogConfig = {
   "appenders": {
@@ -21,14 +23,19 @@ const config: DateFileLogConfig = {
   },
 };
 
-await init(config);
+await initLog(config);
 
 const logger = getLogger();
-
 logger.warning("warning");
 logger.warning(1);
 logger.info("info");
 logger.error("error");
+
+const logger2 = getLogger("task");
+logger2.warning("warning2");
+logger2.warning(2);
+logger2.info("info2");
+logger2.error("error2");
 
 ```
 

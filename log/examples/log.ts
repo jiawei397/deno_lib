@@ -1,4 +1,4 @@
-import { DateFileLogConfig, getLogger, init } from "../mod.ts";
+import { DateFileLogConfig, getLogger, initLog } from "../mod.ts";
 
 const config: DateFileLogConfig = {
   "appenders": {
@@ -20,7 +20,7 @@ const config: DateFileLogConfig = {
   },
 };
 
-await init(config);
+await initLog(config);
 
 const logger = getLogger();
 
