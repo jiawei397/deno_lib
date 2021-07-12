@@ -1,4 +1,4 @@
-import { LevelName } from "./deps.ts";
+import { LevelName } from "../deps.ts";
 
 export type LogAppender = "console" | "dateFile";
 

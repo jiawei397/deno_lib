@@ -4,7 +4,7 @@ import {
   LevelName,
   LogRecord,
   setup,
-} from "./deps.ts";
+} from "../deps.ts";
 import { DateFileHandler } from "./date_file.ts";
 import { DateFileLogConfig } from "./types.ts";
 

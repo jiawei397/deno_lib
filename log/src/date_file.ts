@@ -6,7 +6,7 @@ import {
   LevelName,
   LogLevels,
   LogRecord,
-} from "./deps.ts";
+} from "../deps.ts";
 
 type FormatterFunction = (logRecord: LogRecord) => string;
 type LogMode = "a" | "w" | "x";
