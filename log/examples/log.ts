@@ -13,6 +13,10 @@ const config: DateFileLogConfig = {
       "appenders": ["console", "dateFile"],
       "level": "DEBUG",
     },
+    "task": {
+      "appenders": ["console", "dateFile"],
+      "level": "WARNING",
+    },
   },
 };
 
@@ -24,3 +28,10 @@ logger.warning("warning");
 logger.warning(1);
 logger.info("info");
 logger.error("error");
+
+const logger2 = getLogger("task");
+
+logger2.warning("warning2");
+logger2.warning(2);
+logger2.info("info2");
+logger2.error("error2");
