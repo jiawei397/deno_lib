@@ -2,3 +2,5 @@
 
 - [x] ejs
 - [ ] cli
+- [x] ajax
+- [x] log
