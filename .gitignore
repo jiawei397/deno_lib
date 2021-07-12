@@ -1,5 +1,5 @@
 # If you add anything here, consider also adding to .npmignore
-v8.log
+*.log
 *.swp
 *.swo
 auth_info.js
@@ -11,9 +11,8 @@ spec/browser/autogen_suite.js
 node_modules
 tmtags
 *.DS_Store
-examples/*/log/*
 site/log/*
-.log
+/logs/
 npm-debug.log
 doc/
 test/tmp
