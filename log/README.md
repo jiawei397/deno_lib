@@ -5,7 +5,7 @@ reference from [std log](https://deno.land/std@0.100.0/log), everyday will gener
 ## examples
 
 ``` ts
-import { DateFileLogConfig, getLogger, initLog } from "https://deno.land/x/date_file_log@v0.0.1/mod.ts";
+import { DateFileLogConfig, getLogger, initLog } from "https://deno.land/x/date_file_log@v0.0.4/mod.ts";
 
 const config: DateFileLogConfig = {
   "appenders": {
