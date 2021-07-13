@@ -7,41 +7,19 @@ import {
   LogLevels,
   LogRecord,
 } from "../deps.ts";
-
-type FormatterFunction = (logRecord: LogRecord) => string;
-type LogMode = "a" | "w" | "x";
-
-interface HandlerOptions {
-  formatter?: string | FormatterFunction;
-}
-
-interface FileHandlerOptions extends HandlerOptions {
-  filename: string;
-  pattern?: string; // like : yyyy-MM-dd.log
-  daysToKeep?: number;
-  mode?: LogMode;
-}
-
-function mkdir(dir: string) {
-  try {
-    Deno.mkdirSync(dir, { recursive: true });
-  } catch (e) {
-  }
-}
-
-function expireDate(day: number): Date {
-  const date = new Date();
-  date.setDate(date.getDate() - day);
-  return date;
-}
+import { FileHandlerOptions, LogMode } from "./types.ts";
+import { expireDate, mkdir } from "./utils.ts";
 
 export class DateFileHandler extends handlers.WriterHandler {
   protected _file: Deno.File | undefined;
   protected _buf!: BufWriterSync;
   protected _filename: string;
-  protected _pattern: string;
+  protected _pattern = "yyyy-MM-dd.log";
   protected _mode: LogMode;
-  protected _daysToKeep: number;
+  protected _daysToKeep = 30;
+
+  protected _flushDelay = 1000;
+
   protected _openOptions: Deno.OpenOptions;
   protected _encoder = new TextEncoder();
 
@@ -52,8 +30,15 @@ export class DateFileHandler extends handlers.WriterHandler {
   constructor(levelName: LevelName, options: FileHandlerOptions) {
     super(levelName, options);
     this._filename = options.filename;
-    this._pattern = options.pattern || "yyyy-MM-dd.log";
-    this._daysToKeep = options.daysToKeep || 30;
+    if (options.pattern) {
+      this._pattern = options.pattern;
+    }
+    if (options.daysToKeep) {
+      this._daysToKeep = options.daysToKeep;
+    }
+    if (options.flushTimeout !== undefined) {
+      this._flushDelay = options.flushTimeout;
+    }
     // default to append mode, write only
     this._mode = options.mode ? options.mode : "a";
     this._openOptions = {
@@ -68,9 +53,9 @@ export class DateFileHandler extends handlers.WriterHandler {
 
   init() {
     let name = this._filename;
-    let dir = ".";
+    let dir = "./";
     if (this._filename.includes("/")) {
-      let arr = this._filename.split("/");
+      const arr = this._filename.split("/");
       name = arr.pop()!;
       dir = arr.join("/");
       mkdir(dir);
@@ -119,6 +104,9 @@ export class DateFileHandler extends handlers.WriterHandler {
 
   log(msg: string): void {
     this._buf.writeSync(this._encoder.encode(msg + "\n"));
+    setTimeout(() => {
+      this.flush();
+    }, this._flushDelay);
   }
 
   flush(): void {
