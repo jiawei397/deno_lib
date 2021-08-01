@@ -1,5 +1,3 @@
-import { join } from "./deps.ts";
-
 export type Method =
   | "get"
   | "GET"
@@ -234,7 +232,16 @@ export class BaseAjax {
     if (url.startsWith("http")) {
       return url;
     }
-    return join(baseURL || "", url);
+    if (baseURL) {
+      if (!baseURL.endsWith("/")) {
+        baseURL += "/";
+      }
+      if (url.startsWith("/")) {
+        url = url.substr(1);
+      }
+      return baseURL + url;
+    }
+    return url;
   }
 
   private handlePostData(data: any, isFile?: boolean) {
