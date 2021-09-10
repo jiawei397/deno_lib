@@ -32,5 +32,8 @@ for (let i = 0; i < 100; i++) {
     1: 1,
   }, {
     timeout: 100,
+    headers: {
+      aa: 2
+    }
   }).then((res) => console.log(res));
 }

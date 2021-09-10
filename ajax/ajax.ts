@@ -42,7 +42,7 @@ export interface RequestConfig {
 
   method?: Method;
   baseURL?: string;
-  headers?: any;
+  headers?: Record<string, any>;
   data?: any;
   timeout?: number;
   timeoutErrorMessage?: string;
@@ -70,6 +70,8 @@ export interface RequestConfig {
 }
 
 export interface AjaxExConfig extends RequestConfig {
+  query?: string | Record<string, string | number | boolean>;
+
   isFile?: boolean; // 是否要传递文件
   isNoAlert?: boolean; // 是否要提示错误信息，默认提示
   isUseOrigin?: boolean; // 为true时，直接返回response，不再处理结果
@@ -96,8 +98,6 @@ export interface AjaxConfig extends AjaxExConfig {
   url: string;
   method: Method;
   data?: AjaxData;
-
-  query?: any;
 }
 
 type RequestCallback = (config: AjaxConfig) => AjaxConfig;
