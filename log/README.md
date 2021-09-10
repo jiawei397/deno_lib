@@ -10,7 +10,7 @@ import { DateFileLogConfig, getLogger, initLog } from "https://deno.land/x/date_
 const config: DateFileLogConfig = {
   "appenders": {
     "dateFile": {
-      "filename": "logs/auth",
+      "filename": "logs/deno",
       "daysToKeep": 10,
       "pattern": "yyyy-MM-dd.log",
     },
