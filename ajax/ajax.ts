@@ -90,10 +90,12 @@ export interface AjaxExConfig extends RequestConfig {
   cacheTimeout?: number;
 }
 
+export type AjaxData = any;
+
 export interface AjaxConfig extends AjaxExConfig {
   url: string;
   method: Method;
-  data?: FormData | any;
+  data?: AjaxData;
 
   query?: any;
 }
@@ -257,6 +259,9 @@ export class BaseAjax {
       if (isFile) { //文件上传
         const formData = new FormData(); //构造空对象，下面用append方法赋值。
         for (const key in data) {
+          if (!data.hasOwnProperty(key)) {
+            continue;
+          }
           const value = data[key];
           if (key == "files" && Array.isArray(value)) {
             value.forEach((file) => formData.append(key, file));
@@ -507,7 +512,7 @@ export class BaseAjax {
     };
   }
 
-  get<T>(url: string, data?: any, options?: AjaxExConfig) {
+  get<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
     return this.ajax<T>({
       url,
       method: "get",
@@ -519,7 +524,7 @@ export class BaseAjax {
   /**
    * 调用ajax的get请求的同时，返回取消ajax请求的方法
    */
-  getAbortResult<T>(url: string, data?: any, options?: AjaxExConfig) {
+  getAbortResult<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
     return this.ajaxAbortResult<T>({
       url,
       method: "get",
@@ -528,7 +533,7 @@ export class BaseAjax {
     });
   }
 
-  post<T>(url: string, data?: any, options?: AjaxExConfig) {
+  post<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
     return this.ajax<T>({
       url,
       method: "post",
@@ -540,7 +545,7 @@ export class BaseAjax {
   /**
    * 调用ajax的post请求同时，返回取消ajax请求的方法
    */
-  postAbortResult<T>(url: string, data?: any, options?: AjaxExConfig) {
+  postAbortResult<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
     return this.ajaxAbortResult<T>({
       url,
       method: "post",
