@@ -1,24 +1,24 @@
 export type Method =
-  | "get"
-  | "GET"
-  | "delete"
-  | "DELETE"
-  | "head"
-  | "HEAD"
-  | "options"
-  | "OPTIONS"
-  | "post"
-  | "POST"
-  | "put"
-  | "PUT"
-  | "patch"
-  | "PATCH"
-  | "purge"
-  | "PURGE"
-  | "link"
-  | "LINK"
-  | "unlink"
-  | "UNLINK";
+    | "get"
+    | "GET"
+    | "delete"
+    | "DELETE"
+    | "head"
+    | "HEAD"
+    | "options"
+    | "OPTIONS"
+    | "post"
+    | "POST"
+    | "put"
+    | "PUT"
+    | "patch"
+    | "PATCH"
+    | "purge"
+    | "PURGE"
+    | "link"
+    | "LINK"
+    | "unlink"
+    | "UNLINK";
 
 export type Credentials = "omit" | "include" | "same-origin";
 
@@ -29,11 +29,11 @@ export type AbortResult<T> = {
   abort: () => void;
 };
 
-export type CacheResult = {
-  promise: Promise<any>;
+export interface AjaxResult {
+  promise: Promise<unknown>;
   config: AjaxConfig;
   controller?: AbortController;
-};
+}
 
 export interface RequestConfig {
   url?: string;
@@ -121,6 +121,14 @@ class Interceptors<T> {
   }
 }
 
+function jsonParse(str: any) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return str;
+  }
+}
+
 export class BaseAjax {
   static defaults: AjaxExConfig = {
     credentials: "include",
@@ -152,9 +160,9 @@ export class BaseAjax {
     return this.IS_AJAX_STOP;
   }
 
-  getUniqueKey(config: AjaxConfig) {
+  protected getUniqueKey(config: AjaxConfig) {
     return (config.baseURL || "") + config.url + config.method +
-      (config.data ? JSON.stringify(config.data) : "");
+        (config.data ? JSON.stringify(config.data) : "");
   }
 
   /**
@@ -208,8 +216,8 @@ export class BaseAjax {
       }
       if (exArr.length > 0) {
         const exUrl = isEncodeUrl
-          ? encodeURI(encodeURI(exArr.join("&")))
-          : exArr.join("&"); //这里怎么加密，与后台解密方式也有关。如果不是这样的格式，就自己拼接url
+            ? encodeURI(encodeURI(exArr.join("&")))
+            : exArr.join("&"); //这里怎么加密，与后台解密方式也有关。如果不是这样的格式，就自己拼接url
         if (!tempUrl.includes("?")) {
           tempUrl += "?" + exUrl;
         } else {
@@ -269,10 +277,10 @@ export class BaseAjax {
    * 进行fetch请求
    * @param config 配置
    */
-  async request(config: AjaxConfig) {
+  private async request(config: AjaxConfig) {
     const {
       url,
-      baseURL, //接着的前缀url
+      baseURL, //前缀url
       data,
       query,
       headers = {},
@@ -299,7 +307,7 @@ export class BaseAjax {
         if (!headers["Content-Type"]) {
           headers["Content-Type"] = "application/x-www-form-urlencoded";
         }
-      } else {
+      } else if (method.toUpperCase() === "POST") {
         if (!headers["Content-Type"]) {
           headers["Content-Type"] = "application/json";
         }
@@ -313,10 +321,12 @@ export class BaseAjax {
         credentials,
         ...otherParams,
       });
-      if (!response.ok) { //代表网络请求失败，原因可能是token失效，这时需要跳转到登陆页
+      if (!response.ok) { // 状态码不是200到300或304，代表请求失败
         if (Array.isArray(ignore) && ignore.includes(response.status)) {
           return null;
         }
+        const msg = await response.text();
+        this.showMessage(msg || response.statusText, config);
         this.handleErrorResponse(response);
         return Promise.reject(response);
       }
@@ -324,7 +334,8 @@ export class BaseAjax {
         return response;
       }
       //以下处理成功的结果
-      return response.json();
+      const result = await response.text();
+      return jsonParse(result);
     } catch (err) { //代表网络异常
       if (!this.isAbortError(err)) { //不属于主动取消的，需要进行提示
         this.showMessage(err, config);
@@ -334,17 +345,69 @@ export class BaseAjax {
   }
 
   /**
-   * 处理错误请求
+   * 处理200-300或304外的错误状态码的请求
+   * 一般可以在这里处理跳转逻辑
    */
   protected handleErrorResponse(response: Response) {
     console.error(
-      `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
+        `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
     );
   }
 
   isAbortError(err: Error) {
     return err.name === "AbortError";
   }
+
+  private mergeAbortConfig(
+      config: AjaxConfig,
+      signal?: AbortSignal,
+  ): AbortController | undefined {
+    let controller;
+    if (typeof AbortController === "function" && signal === undefined) { // 如果要自己控制取消请求，需要自己传递signal，或者使用isReturnAbort参数
+      controller = new AbortController();
+      config.signal = controller.signal;
+    }
+    return controller;
+  }
+
+  private mergeConfig(cfg: AjaxConfig): AjaxConfig {
+    const config = Object.assign({}, BaseAjax.defaults, cfg); // 把默认值覆盖了
+    const chain = this.interceptors.request.chain;
+    let callback;
+    let errCallback;
+    while (callback = chain.shift()) {
+      try {
+        errCallback = chain.shift();
+        callback(config);
+      } catch (e) {
+        console.error(e);
+        errCallback(e); // TODO 这个作用没想好
+        break;
+      }
+    }
+    return config;
+  }
+
+  private mergeResponse(promise: Promise<any>) {
+    const chain = this.interceptors.response.chain;
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift());
+    }
+    return promise;
+  }
+
+  private clearCacheByKey(uniqueKey: string, cacheTimeout?: number) {
+    if (cacheTimeout !== undefined) {
+      if (cacheTimeout >= 0) { // 如果小于0，不清除
+        setTimeout(() => {
+          this.caches.delete(uniqueKey);
+        }, cacheTimeout);
+      }
+    } else {
+      this.caches.delete(uniqueKey);
+    }
+  }
+
 
   /**
    * 实现fetch的timeout 功能
@@ -353,9 +416,9 @@ export class BaseAjax {
    * @param config
    **/
   private fetch_timeout(
-    fecthPromise: Promise<any>,
-    controller: AbortController | undefined,
-    config: AjaxConfig,
+      fecthPromise: Promise<any>,
+      controller: AbortController | undefined,
+      config: AjaxConfig,
   ) {
     let tp: any;
     const timeout = config.timeout;
@@ -375,122 +438,71 @@ export class BaseAjax {
     });
   }
 
-  private mergeAbortConfig(
-    config: AjaxConfig,
-    signal?: AbortSignal,
-  ): AbortController | undefined {
-    let controller;
-    if (typeof AbortController === "function" && signal === undefined) { // 如果要自己控制取消请求，需要自己传递signal，或者使用isReturnAbort参数
-      controller = new AbortController();
-      config.signal = controller.signal;
-    }
-    return controller;
-  }
-
-  mergeConfig(cfg: AjaxConfig) {
-    const config = Object.assign({}, BaseAjax.defaults, cfg); // 把默认值覆盖了
-    const chain = this.interceptors.request.chain;
-    let callback;
-    let errCallback;
-    while (callback = chain.shift()) {
-      try {
-        errCallback = chain.shift();
-        callback(config);
-      } catch (e) {
-        console.error(e);
-        errCallback(e); // TODO 这个作用没想好
-        break;
-      }
-    }
-    return config;
-  }
-
-  mergeResponse(promise: Promise<any>) {
-    const chain = this.interceptors.response.chain;
-    while (chain.length) {
-      promise = promise.then(chain.shift(), chain.shift());
-    }
-    return promise;
-  }
-
-  clearCacheByKey(uniqueKey: string, cacheTimeout?: number) {
-    if (cacheTimeout !== undefined) {
-      if (cacheTimeout >= 0) { // 如果小于0，不清除
-        setTimeout(() => {
-          this.caches.delete(uniqueKey);
-        }, cacheTimeout);
-      }
-    } else {
-      this.caches.delete(uniqueKey);
-    }
+  private core_ajax(mergedConfig: AjaxConfig): AjaxResult {
+    const {signal} = mergedConfig;
+    const controller = this.mergeAbortConfig(mergedConfig, signal);
+    const temp = this.request(mergedConfig);
+    const promise = this.fetch_timeout(temp, controller, mergedConfig);
+    return {
+      promise: this.mergeResponse(promise),
+      config: mergedConfig,
+      controller,
+    };
   }
 
   /**
    * 缓存请求，同一时间同一请求只会向后台发送一次
    */
-  private cache_ajax(cfg: AjaxConfig): CacheResult {
-    const config = this.mergeConfig(cfg);
-    const { signal, cacheTimeout } = config;
-    if (cacheTimeout === 0) { // 不缓存结果
-      const controller = this.mergeAbortConfig(config, signal);
-      const promise = this.request(config);
-      return {
-        promise: this.mergeResponse(promise),
-        config,
-        controller,
-      };
+  private cache_ajax(cfg: AjaxConfig): AjaxResult {
+    const mergedConfig = this.mergeConfig(cfg);
+    const {cacheTimeout} = mergedConfig;
+    if (cacheTimeout === 0) { // 不缓存结果，也就是说不会过滤掉重复的请求
+      return this.core_ajax(mergedConfig);
     }
-    const uniqueKey = this.getUniqueKey(config);
+    const uniqueKey = this.getUniqueKey(mergedConfig);
     const caches = this.caches;
     if (!caches.has(uniqueKey)) {
-      const controller = this.mergeAbortConfig(config, signal);
-      const temp = this.request(config).then((result) => {
-        this.clearCacheByKey(uniqueKey, config.cacheTimeout);
-        return result;
+      const result = this.core_ajax(mergedConfig);
+      result.promise = result.promise.then((res) => {
+        this.clearCacheByKey(uniqueKey, mergedConfig.cacheTimeout);
+        return res;
       }, (err) => {
-        this.clearCacheByKey(uniqueKey, config.cacheTimeout);
+        this.clearCacheByKey(uniqueKey, mergedConfig.cacheTimeout);
         return Promise.reject(err);
       });
-      const promise = this.fetch_timeout(temp, controller, config);
-      caches.set(uniqueKey, {
-        promise: this.mergeResponse(promise),
-        config,
-        controller,
-      });
+      caches.set(uniqueKey, result);
     } else {
       console.debug(`read from cache : ${uniqueKey}`);
     }
     return caches.get(uniqueKey);
   }
 
+  private all_ajax(cfg: AjaxConfig): AjaxResult {
+    const {isOutStop} = cfg;
+    if (!isOutStop && this.isAjaxStopped()) {
+      return {
+        promise: Promise.reject(BaseAjax.defaults.stoppedErrorMessage),
+        config: cfg
+      }
+    }
+    return this.cache_ajax(cfg);
+  }
+
   /**
    * ajax主方法，返回promise
    */
   ajax<T>(cfg: AjaxConfig): Promise<T> {
-    const { isOutStop } = cfg;
-    if (!isOutStop && this.isAjaxStopped()) {
-      return Promise.reject(BaseAjax.defaults.stoppedErrorMessage);
-    }
-    const result = this.cache_ajax(cfg);
-    return result.promise;
+    const result = this.all_ajax(cfg);
+    return result.promise as Promise<T>;
   }
 
   /**
    * 调用ajax的同时，返回取消ajax请求的方法
    */
   ajaxAbortResult<T>(cfg: AjaxConfig): AbortResult<T> {
-    const { isOutStop } = cfg;
-    if (!isOutStop && this.isAjaxStopped()) {
-      const promise = Promise.reject(BaseAjax.defaults.stoppedErrorMessage);
-      return {
-        promise,
-        abort: () => {
-        },
-      };
-    }
-    const result = this.cache_ajax(cfg);
+    const result = this.all_ajax(cfg);
     return {
-      promise: result.promise,
+      promise: result.promise as Promise<T>,
       abort: () => {
         return this.abort(result.controller);
       },
