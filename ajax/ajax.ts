@@ -1,24 +1,24 @@
 export type Method =
-    | "get"
-    | "GET"
-    | "delete"
-    | "DELETE"
-    | "head"
-    | "HEAD"
-    | "options"
-    | "OPTIONS"
-    | "post"
-    | "POST"
-    | "put"
-    | "PUT"
-    | "patch"
-    | "PATCH"
-    | "purge"
-    | "PURGE"
-    | "link"
-    | "LINK"
-    | "unlink"
-    | "UNLINK";
+  | "get"
+  | "GET"
+  | "delete"
+  | "DELETE"
+  | "head"
+  | "HEAD"
+  | "options"
+  | "OPTIONS"
+  | "post"
+  | "POST"
+  | "put"
+  | "PUT"
+  | "patch"
+  | "PATCH"
+  | "purge"
+  | "PURGE"
+  | "link"
+  | "LINK"
+  | "unlink"
+  | "UNLINK";
 
 export type Credentials = "omit" | "include" | "same-origin";
 
@@ -138,7 +138,6 @@ export class BaseAjax {
     timeoutErrorStatus: 504,
     stoppedErrorMessage: "Ajax has been stopped! ",
     method: "get",
-    keepalive: false,
   };
 
   public interceptors = {
@@ -162,7 +161,7 @@ export class BaseAjax {
 
   protected getUniqueKey(config: AjaxConfig) {
     return (config.baseURL || "") + config.url + config.method +
-        (config.data ? JSON.stringify(config.data) : "");
+      (config.data ? JSON.stringify(config.data) : "");
   }
 
   /**
@@ -216,8 +215,8 @@ export class BaseAjax {
       }
       if (exArr.length > 0) {
         const exUrl = isEncodeUrl
-            ? encodeURI(encodeURI(exArr.join("&")))
-            : exArr.join("&"); //这里怎么加密，与后台解密方式也有关。如果不是这样的格式，就自己拼接url
+          ? encodeURI(encodeURI(exArr.join("&")))
+          : exArr.join("&"); //这里怎么加密，与后台解密方式也有关。如果不是这样的格式，就自己拼接url
         if (!tempUrl.includes("?")) {
           tempUrl += "?" + exUrl;
         } else {
@@ -350,7 +349,7 @@ export class BaseAjax {
    */
   protected handleErrorResponse(response: Response) {
     console.error(
-        `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
+      `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
     );
   }
 
@@ -359,8 +358,8 @@ export class BaseAjax {
   }
 
   private mergeAbortConfig(
-      config: AjaxConfig,
-      signal?: AbortSignal,
+    config: AjaxConfig,
+    signal?: AbortSignal,
   ): AbortController | undefined {
     let controller;
     if (typeof AbortController === "function" && signal === undefined) { // 如果要自己控制取消请求，需要自己传递signal，或者使用isReturnAbort参数
@@ -408,7 +407,6 @@ export class BaseAjax {
     }
   }
 
-
   /**
    * 实现fetch的timeout 功能
    * @param fecthPromise fetch
@@ -416,9 +414,9 @@ export class BaseAjax {
    * @param config
    **/
   private fetch_timeout(
-      fecthPromise: Promise<any>,
-      controller: AbortController | undefined,
-      config: AjaxConfig,
+    fecthPromise: Promise<any>,
+    controller: AbortController | undefined,
+    config: AjaxConfig,
   ) {
     let tp: any;
     const timeout = config.timeout;
@@ -439,7 +437,7 @@ export class BaseAjax {
   }
 
   private core_ajax(mergedConfig: AjaxConfig): AjaxResult {
-    const {signal} = mergedConfig;
+    const { signal } = mergedConfig;
     const controller = this.mergeAbortConfig(mergedConfig, signal);
     const temp = this.request(mergedConfig);
     const promise = this.fetch_timeout(temp, controller, mergedConfig);
@@ -455,7 +453,7 @@ export class BaseAjax {
    */
   private cache_ajax(cfg: AjaxConfig): AjaxResult {
     const mergedConfig = this.mergeConfig(cfg);
-    const {cacheTimeout} = mergedConfig;
+    const { cacheTimeout } = mergedConfig;
     if (cacheTimeout === 0) { // 不缓存结果，也就是说不会过滤掉重复的请求
       return this.core_ajax(mergedConfig);
     }
@@ -478,12 +476,12 @@ export class BaseAjax {
   }
 
   private all_ajax(cfg: AjaxConfig): AjaxResult {
-    const {isOutStop} = cfg;
+    const { isOutStop } = cfg;
     if (!isOutStop && this.isAjaxStopped()) {
       return {
         promise: Promise.reject(BaseAjax.defaults.stoppedErrorMessage),
-        config: cfg
-      }
+        config: cfg,
+      };
     }
     return this.cache_ajax(cfg);
   }
