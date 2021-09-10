@@ -9,14 +9,16 @@
 ## 使用
 
 ### 封装ajax
-``` ts
-import { BaseAjax } from "./index";
 
-export class Ajax extends BaseAjax {
+```ts
+import { BaseAjax } from "https://deno.land/x/jw_fetch/mod.ts";
+
+class Ajax extends BaseAjax {
   /**
    * 处理消息，具体实现可以覆盖此项
    */
   protected handleMessage(msg: string) {
+    console.log("handleMessage", msg);
     super.handleMessage(msg);
   }
 
@@ -27,48 +29,42 @@ export class Ajax extends BaseAjax {
     console.error(
       `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
     );
-    if (response.status === 401) { //权限问题
-      this.stopAjax();
-      this.abortAll();
-      // toLogin();
-    }
   }
 }
 
 Ajax.defaults.baseURL = "/api";
 
 export const ajax = new Ajax();
-export const get = ajax.get.bind(ajax);
-export const post = ajax.post.bind(ajax);
 ```
 
 ### 拦截
-``` ts
+
+```ts
 // 请求拦截
-ajax.interceptors.request.use(function(config) {
-  config.headers = config.headers || {};
-  config.headers.token = "abcd";
-  return config;
-}, function(err)  {
+ajax.interceptors.request.use(function (mergedConfig) {
+  mergedConfig.headers = mergedConfig.headers || {};
+  mergedConfig.headers.token = "abcd";
+  return mergedConfig;
+}, function (err) {
   return Promise.reject(err);
 });
 
 // 响应拦截
-ajax.interceptors.response.use(function(data) {
+ajax.interceptors.response.use(function (data) {
   return data.slice(0, 10);
-}, function(err)  {
+}, function (err) {
   return Promise.reject(err);
 });
 ```
 
 ### 获取可取消的请求
 
-```ts 
-const {promise, abort}  = ajax.getAbortResult(url, data, options);
+```ts
+const { promise, abort } = ajax.getAbortResult(url, data, options);
 promise.then((result) => console.log(result));
 abort(); // 取消请求
 
-const {promise2, abort2}  = ajax.postAbortResult(url, data, options);
+const { promise2, abort2 } = ajax.postAbortResult(url, data, options);
 promise2.then((result) => console.log(result));
 abort2(); // 取消请求
 ```
@@ -106,32 +102,28 @@ Type: `any`
 ### timeout
 
 Type: `number`
-<br>
-Default: `2 * 60 * 1000`，2分钟
+<br> Default: `2 * 60 * 1000`，2分钟
 
 过期时间，单位ms。从请求开始，到这个时间如果接口没有响应，则会返回一个失败的promise。
 
 ### timeoutErrorMessage
 
 Type: `string`
-<br>
-Default: `timeout`
+<br> Default: `timeout`
 
 过期时间错误提示
 
 ### timeoutErrorStatus
 
 Type: `number`
-<br>
-Default: `504`
+<br> Default: `504`
 
 过期时间状态码
 
 ### credentials
 
 Type: `string`
-<br>
-Default: `include`
+<br> Default: `include`
 
 - omit：忽略cookie的发送
 - same-origin: 表示cookie只能同域发送，不能跨域发送
@@ -140,19 +132,22 @@ Default: `include`
 ### mode
 
 Type: `string`
-<br>
-Default: `cors`
+<br> Default: `cors`
 
-- same-origin：该模式是不允许跨域的，它需要遵守同源策略，否则浏览器会返回一个error告知不能跨域；其对应的response type为basic。
-- cors: 该模式支持跨域请求，顾名思义它是以CORS的形式跨域；当然该模式也可以同域请求不需要后端额外的CORS支持；其对应的response type为cors。
-- no-cors: 该模式用于跨域请求但是服务器不带CORS响应头，也就是服务端不支持CORS；这也是fetch的特殊跨域请求方式；其对应的response type为opaque。
+- same-origin：该模式是不允许跨域的，它需要遵守同源策略，否则浏览器会返回一个error告知不能跨域；其对应的response
+  type为basic。
+- cors: 该模式支持跨域请求，顾名思义它是以CORS的形式跨域；当然该模式也可以同域请求不需要后端额外的CORS支持；其对应的response
+  type为cors。
+- no-cors: 该模式用于跨域请求但是服务器不带CORS响应头，也就是服务端不支持CORS；这也是fetch的特殊跨域请求方式；其对应的response
+  type为opaque。
 
 ### stoppedErrorMessage
+
 Type: `string`
-<br>
-Default: `Ajax has been stopped! `
+<br> Default: `Ajax has been stopped!`
 
 当所有ajax停止后，提示错误信息。
+
 ### isFile
 
 Type: `boolean`
@@ -169,7 +164,8 @@ Type: `boolean`
 
 Type: `boolean`
 
-为true时，直接返回response，不再处理结果
+为true时，直接返回response，不再处理结果。
+一般返回结果不是json对象，比如是流时需要设置此项。
 
 ### isEncodeUrl
 
@@ -188,6 +184,7 @@ Type: `boolean`
 Type: `AbortSignal`
 
 主动控制取消请求时可传递此参数，或者直接使用ajaxAbortResult方法。例如：
+
 ```
 const controller = new AbortController();
 const {signal} = controller;
@@ -198,5 +195,7 @@ const {signal} = controller;
 Type: `number`
 
 缓存时间
+
 - 如果是-1，代表不清除缓存。
 - 如果是0，代表不使用缓存。
+- 如果大于0，代表要缓存多长时间，单位是ms。
