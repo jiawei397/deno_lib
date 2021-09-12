@@ -51,24 +51,24 @@ export class DateFileHandler extends handlers.WriterHandler {
     this.init();
   }
 
-  init() {
+  async init() {
     let name = this._filename;
     let dir = "./";
     if (this._filename.includes("/")) {
       const arr = this._filename.split("/");
       name = arr.pop()!;
       dir = arr.join("/");
-      mkdir(dir);
+      await mkdir(dir);
     }
     const ed = expireDate(this._daysToKeep);
     const expiredFileName = this.getFilenameByDate(name, ed);
-    for (const dirEntry of Deno.readDirSync(dir)) {
+    for await (const dirEntry of Deno.readDir(dir)) {
       if (dirEntry.name.startsWith(name) && /\d+/.test(dirEntry.name)) {
         if (expiredFileName > dirEntry.name) {
           console.log(
             `[${dirEntry.name}]Compared to [${expiredFileName}] has expired and will be deleted soon`,
           );
-          Deno.removeSync(join(dir, dirEntry.name));
+          await Deno.remove(join(dir, dirEntry.name));
         }
       }
     }
@@ -78,9 +78,9 @@ export class DateFileHandler extends handlers.WriterHandler {
     return this.getFilenameByDate(this._filename);
   }
 
-  getFilenameByDate(filename: string, date?: Date): string {
+  getFilenameByDate(filename: string, date = new Date()): string {
     if (this._pattern) {
-      return filename + "." + dateToString(this._pattern, date || new Date());
+      return filename + "." + dateToString(this._pattern, date);
     }
     return filename;
   }

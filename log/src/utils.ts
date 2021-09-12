@@ -1,7 +1,8 @@
-export function mkdir(dir: string) {
+export async function mkdir(dir: string) {
   try {
-    Deno.mkdirSync(dir, { recursive: true });
+    await Deno.mkdir(dir, { recursive: true });
   } catch (e) {
+    // console.debug(e);
   }
 }
 

@@ -22,6 +22,9 @@ export interface DateFileLogConfig {
     dateFile: FileHandlerOptions;
   };
   categories: {
-    [key: string]: { level: LevelName; appenders: LogAppender[] };
+    [key: string]: {
+      level: LevelName;
+      appenders: LogAppender[];
+    };
   };
 }

@@ -1,11 +1,16 @@
 # date_file_log
 
-reference from [std log](https://deno.land/std@0.100.0/log), everyday will generate a new log file.
+reference from [std log](https://deno.land/std@0.100.0/log), everyday will
+generate a new log file.
 
 ## examples
 
-``` ts
-import { DateFileLogConfig, getLogger, initLog } from "https://deno.land/x/date_file_log@v0.0.4/mod.ts";
+```ts
+import {
+  DateFileLogConfig,
+  getLogger,
+  initLog,
+} from "https://deno.land/x/date_file_log@v0.0.4/mod.ts";
 
 const config: DateFileLogConfig = {
   "appenders": {
@@ -36,7 +41,6 @@ logger2.warning("warning2");
 logger2.warning(2);
 logger2.info("info2");
 logger2.error("error2");
-
 ```
 
 then will generate a log named like `auth.2021-07-12.log` in logs
