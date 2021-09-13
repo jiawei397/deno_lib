@@ -3,7 +3,7 @@ import { DateFileLogConfig, getLogger, initLog } from "../mod.ts";
 const config: DateFileLogConfig = {
   "appenders": {
     "dateFile": {
-      "filename": "logs/auth",
+      "filename": "logs/deno",
       "daysToKeep": 10,
       "pattern": "yyyy-MM-dd.log",
     },
@@ -33,5 +33,5 @@ const logger2 = getLogger("task");
 
 logger2.warning("warning2");
 logger2.warning(2);
-logger2.info("info2");
+logger2.info("info2"); // will be ignored
 logger2.error("error2");

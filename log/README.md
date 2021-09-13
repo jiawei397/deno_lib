@@ -43,4 +43,4 @@ logger2.info("info2");
 logger2.error("error2");
 ```
 
-then will generate a log named like `auth.2021-07-12.log` in logs
+then will generate a log named like `deno.2021-07-12.log` in logs
