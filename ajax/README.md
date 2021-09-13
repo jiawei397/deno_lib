@@ -164,8 +164,7 @@ Type: `boolean`
 
 Type: `boolean`
 
-为true时，直接返回response，不再处理结果。
-一般返回结果不是json对象，比如是流时需要设置此项。
+为true时，直接返回response，不再处理结果。 一般返回结果不是json对象，比如是流时需要设置此项。
 
 ### isEncodeUrl
 
