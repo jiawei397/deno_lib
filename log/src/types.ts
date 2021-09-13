@@ -1,20 +1,24 @@
-import { LevelName, LogRecord } from "../deps.ts";
+import { BaseHandler, HandlerOptions, LevelName, LoggerConfig, LogMode } from "../deps.ts";
 
 export type LogAppender = "console" | "dateFile";
 
-export type FormatterFunction = (logRecord: LogRecord) => string;
-export type LogMode = "a" | "w" | "x";
-
-export interface HandlerOptions {
-  formatter?: string | FormatterFunction;
+export interface LogLoggers {
+  [name: string]: LoggerConfig;
 }
+
+
+export interface LogHandlers {
+  [name: string]: BaseHandler;
+}
+
 
 export interface FileHandlerOptions extends HandlerOptions {
   filename: string;
+  mode?: LogMode;
+
   pattern?: string; // like : yyyy-MM-dd.log
   daysToKeep?: number;
   flushTimeout?: number;
-  mode?: LogMode;
 }
 
 export interface DateFileLogConfig {

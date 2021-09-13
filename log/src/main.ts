@@ -6,7 +6,7 @@ import {
   setup,
 } from "../deps.ts";
 import { DateFileHandler } from "./date_file.ts";
-import { DateFileLogConfig } from "./types.ts";
+import { DateFileLogConfig, LogHandlers, LogLoggers } from "./types.ts";
 
 export function initLog(config: DateFileLogConfig) {
   const formatter = (logRecord: LogRecord) => {
@@ -19,13 +19,10 @@ export function initLog(config: DateFileLogConfig) {
     return msg;
   };
 
-  const loggers: any = {};
-  const handlers: any = {};
+  const loggers: LogLoggers = {};
+  const handlers: LogHandlers = {};
   Object.keys(config.categories).forEach((key: string) => {
-    let level: LevelName = config.categories[key].level;
-    if (/[a-z]+/.test(level)) {
-      level = level.toUpperCase() as LevelName;
-    }
+    const level = config.categories[key].level.toUpperCase() as LevelName;
     const appenders = config.categories[key].appenders;
 
     if (appenders.includes("console")) {
@@ -39,8 +36,6 @@ export function initLog(config: DateFileLogConfig) {
       if (!handlers.dateFile) {
         handlers.dateFile = new DateFileHandler(level, {
           ...config.appenders.dateFile,
-          // you can change format of output message using any keys in `LogRecord`.
-          // formatter: "${datetime} {levelName} {msg}",
           formatter,
         });
       }
