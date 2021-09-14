@@ -209,7 +209,7 @@ export class BaseAjax {
         credentials,
         ...otherParams,
       });
-      if (!response.ok) { // 状态码不是200到300或304，代表请求失败
+      if (!response.ok) { // 状态码不是200到300，代表请求失败
         if (!(Array.isArray(ignore) && ignore.includes(response.status))) { // 如果不忽略错误码
           const msg = await response.text();
           this.showMessage(msg || response.statusText, config);
@@ -232,7 +232,7 @@ export class BaseAjax {
   }
 
   /**
-   * 处理200-300或304外的错误状态码的请求
+   * 处理200-300外的错误状态码的请求
    * 一般可以在这里处理跳转逻辑
    */
   protected handleErrorResponse(response: Response) {
