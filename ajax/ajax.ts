@@ -60,10 +60,8 @@ export class BaseAjax {
    * 取消接口请求
    * @param controller 取消控制器
    */
-  abort(controller: AbortController | undefined) {
-    if (controller) {
-      controller.abort();
-    }
+  abort(controller?: AbortController) {
+    controller?.abort();
   }
 
   /**
@@ -197,11 +195,7 @@ export class BaseAjax {
         tempUrl = this.handleGetUrl(tempUrl, query, isEncodeUrl);
       }
       body = this.handlePostData(data, isFile);
-      if (isFile) {
-        if (!headers["Content-Type"]) {
-          headers["Content-Type"] = "application/x-www-form-urlencoded";
-        }
-      } else if (method.toUpperCase() === "POST") {
+      if (method.toUpperCase() === "POST") {
         if (!headers["Content-Type"]) {
           headers["Content-Type"] = "application/json";
         }
@@ -266,7 +260,7 @@ export class BaseAjax {
   private mergeConfig(cfg: AjaxConfig): AjaxConfig {
     deleteUndefinedProperty(cfg);
     const config = Object.assign({}, BaseAjax.defaults, cfg); // 把默认值覆盖了
-    const chain = this.interceptors.request.chain;
+    const chain = this.interceptors.request.chain.concat([]);
     let callback;
     let errCallback;
     while (callback = chain.shift()) {
@@ -283,7 +277,7 @@ export class BaseAjax {
   }
 
   private mergeResponse(promise: Promise<any>) {
-    const chain = this.interceptors.response.chain;
+    const chain = this.interceptors.response.chain.concat([]);
     while (chain.length) {
       promise = promise.then(chain.shift(), chain.shift());
     }
