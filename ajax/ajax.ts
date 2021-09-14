@@ -260,16 +260,13 @@ export class BaseAjax {
   private mergeConfig(cfg: AjaxConfig): AjaxConfig {
     deleteUndefinedProperty(cfg);
     const config = Object.assign({}, BaseAjax.defaults, cfg); // 把默认值覆盖了
-    const chain = this.interceptors.request.chain.concat([]);
-    let callback;
-    let errCallback;
-    while (callback = chain.shift()) {
+    const chain = this.interceptors.request.chain;
+    for (let i = 0; i < chain.length; i += 2) {
       try {
-        errCallback = chain.shift();
-        callback(config);
+        chain[i](config);
       } catch (e) {
         console.error(e);
-        errCallback(e); // TODO 这个作用没想好
+        chain[i + 1]?.(e); // TODO 这个作用没想好
         break;
       }
     }
@@ -277,9 +274,9 @@ export class BaseAjax {
   }
 
   private mergeResponse(promise: Promise<any>) {
-    const chain = this.interceptors.response.chain.concat([]);
-    while (chain.length) {
-      promise = promise.then(chain.shift(), chain.shift());
+    const chain = this.interceptors.response.chain;
+    for (let i = 0; i < chain.length; i += 2) {
+      promise = promise.then(chain[i], chain[i + 1]);
     }
     return promise;
   }
