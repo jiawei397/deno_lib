@@ -1,3 +1,7 @@
 export * from "./ajax.ts";
 
-export const version = "0.1.3";
+export * from "./utils.ts";
+
+export * from './types.ts';
+
+export const version = "0.1.4";
