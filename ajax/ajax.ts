@@ -29,7 +29,8 @@ export class BaseAjax {
     timeoutErrorMessage: "timeout",
     timeoutErrorStatus: 504,
     stoppedErrorMessage: "Ajax has been stopped! ",
-    method: "get",
+    method: "post",
+    defaultPutAndPostContentType: "application/json; charset=UTF-8"
   };
 
   public interceptors = {
@@ -182,6 +183,7 @@ export class BaseAjax {
       isUseOrigin,
       isEncodeUrl, //get请求时是否要进行浏览器编码
       ignore,
+      defaultPutAndPostContentType,
       ...otherParams
     } = config;
 
@@ -195,9 +197,11 @@ export class BaseAjax {
         tempUrl = this.handleGetUrl(tempUrl, query, isEncodeUrl);
       }
       body = this.handlePostData(data, isFile);
-      if (method.toUpperCase() === "POST") {
-        if (!headers["Content-Type"]) {
-          headers["Content-Type"] = "application/json";
+      if (!isFile) {
+        if (method.toUpperCase() === "POST" || method.toUpperCase() === "PUT") {
+          if (!Object.keys(headers).find(key => key.toLowerCase() === 'content-type')) {
+            headers["content-type"] = defaultPutAndPostContentType!;
+          }
         }
       }
     }

@@ -47,23 +47,23 @@ interface User {
 }
 
 for (let i = 0; i < 5; i++) {
-  ajax.get<User>("http://localhost:1000/api/user/info", {
+  ajax.get<User>("http://localhost:1000", {
     1: 1,
   }, {
     timeout: 100,
     headers: {
-      aa: 2,
+      aa: '2',
     },
   }).then((res) => console.log(res));
 }
 
 setTimeout(() => {
-  ajax.get<User>("http://localhost:1000/api/user/info", {
+  ajax.get<User>("http://localhost:1000", {
     1: 1,
   }, {
     timeout: 100,
     headers: {
-      aa: 2,
+      aa: '2',
     },
   }).then((res) => console.log(res));
 }, 5000);

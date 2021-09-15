@@ -42,7 +42,7 @@ export interface RequestConfig {
 
     method?: Method;
     baseURL?: string;
-    headers?: Record<string, any>;
+    headers?: Record<string, string>;
     data?: any;
     timeout?: number;
     timeoutErrorMessage?: string;
@@ -90,6 +90,10 @@ export interface AjaxExConfig extends RequestConfig {
      * 如果是0，代表不使用缓存
      */
     cacheTimeout?: number;
+
+
+    /* 默认put和post的content-type */
+    defaultPutAndPostContentType?: string;
 }
 
 export type AjaxData = any;
