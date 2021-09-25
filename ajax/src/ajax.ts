@@ -1,7 +1,14 @@
-import { ErrorCallback, AjaxExConfig, RequestCallback, ResponseCallback, AjaxConfig, AjaxResult, AbortResult, AjaxData } from "./types.ts";
-import { jsonParse, deleteUndefinedProperty } from "./utils.ts";
-
-
+import {
+  AbortResult,
+  AjaxConfig,
+  AjaxData,
+  AjaxExConfig,
+  AjaxResult,
+  ErrorCallback,
+  RequestCallback,
+  ResponseCallback,
+} from "./types.ts";
+import { deleteUndefinedProperty, jsonParse } from "./utils.ts";
 
 class Interceptors<T> {
   public chain: any[];
@@ -20,7 +27,6 @@ class Interceptors<T> {
   }
 }
 
-
 export class BaseAjax {
   static defaults: AjaxExConfig = {
     credentials: "include",
@@ -30,7 +36,7 @@ export class BaseAjax {
     timeoutErrorStatus: 504,
     stoppedErrorMessage: "Ajax has been stopped! ",
     method: "post",
-    defaultPutAndPostContentType: "application/json; charset=UTF-8"
+    defaultPutAndPostContentType: "application/json; charset=UTF-8",
   };
 
   public interceptors = {
@@ -199,7 +205,11 @@ export class BaseAjax {
       body = this.handlePostData(data, isFile);
       if (!isFile) {
         if (method.toUpperCase() === "POST" || method.toUpperCase() === "PUT") {
-          if (!Object.keys(headers).find(key => key.toLowerCase() === 'content-type')) {
+          if (
+            !Object.keys(headers).find((key) =>
+              key.toLowerCase() === "content-type"
+            )
+          ) {
             headers["content-type"] = defaultPutAndPostContentType!;
           }
         }

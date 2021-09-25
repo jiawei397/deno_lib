@@ -24,7 +24,7 @@ class Ajax extends BaseAjax {
 export const ajax = new Ajax();
 
 ajax.interceptors.request.use(function (mergedConfig) {
-  console.log('----request---')
+  console.log("----request---");
   mergedConfig.headers = mergedConfig.headers || {};
   mergedConfig.headers.token = "abcd";
   return mergedConfig;
@@ -34,13 +34,12 @@ ajax.interceptors.request.use(function (mergedConfig) {
 
 // 响应拦截
 ajax.interceptors.response.use(function (data) {
-  console.log('----response---')
+  console.log("----response---");
   // return data.slice(0, 10);
   return data;
 }, function (err) {
   return Promise.reject(err);
 });
-
 
 interface User {
   name: string;
@@ -52,7 +51,7 @@ for (let i = 0; i < 5; i++) {
   }, {
     timeout: 100,
     headers: {
-      aa: '2',
+      aa: "2",
     },
   }).then((res) => console.log(res));
 }
@@ -63,7 +62,7 @@ setTimeout(() => {
   }, {
     timeout: 100,
     headers: {
-      aa: '2',
+      aa: "2",
     },
   }).then((res) => console.log(res));
 }, 5000);
