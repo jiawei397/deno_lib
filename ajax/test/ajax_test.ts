@@ -1,5 +1,5 @@
 // Copyright 2018-2021 the oak authors. All rights reserved. MIT license.
-import {assert, assertEquals, assertThrows, describe, it, beforeEach, afterEach} from "./test_deps.ts";
+import {assert, assertEquals, assertThrows, describe, it, beforeEach, afterEach, mf} from "./test_deps.ts";
 import {BaseAjax} from "../src/ajax.ts";
 import {ajax} from "../example.ts";
 
@@ -22,13 +22,29 @@ class Ajax extends BaseAjax {
   }
 }
 
+function mock(){
+  mf.install();
+
+  mf.mock("GET@/api/", (_req) => {
+    // @ts-ignore
+    return new Response(`ok`, {
+      status: 200
+    });
+  });
+}
+
+mock();
+
 describe("ajax", () => {
   let ajax: Ajax;
 
   beforeEach(() => {
     ajax = new Ajax();
-  })
-  describe("request and response count", async () => {
+  });
+
+  const request = () => ajax.get('http://localhost/api/');
+
+  describe("request and response count", () => {
     let requestCount = 0;
     let responseCount = 0;
 
@@ -54,8 +70,6 @@ describe("ajax", () => {
       });
     });
 
-    const request = () => ajax.get('https://www.baidu.com').catch(console.error);
-
     it('once', async () => {
       assertEquals(requestCount, 0);
       assertEquals(responseCount, 0);
@@ -77,7 +91,13 @@ describe("ajax", () => {
     });
   });
 
-  // it("user exists", () => {
-  //   assertEquals(responseCount, 0);
-  // });
+  describe("response count", () => {
+    it('once', async () => {
+      let count = 0;
+      await request().then(() => {
+        count++;
+      });
+      assertEquals(count, 1);
+    })
+  });
 });
