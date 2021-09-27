@@ -1,4 +1,10 @@
-import { BaseHandler, HandlerOptions, LevelName, LoggerConfig, LogMode } from "../deps.ts";
+import {
+  BaseHandler,
+  HandlerOptions,
+  LevelName,
+  LoggerConfig,
+  LogMode,
+} from "../deps.ts";
 
 export type LogAppender = "console" | "dateFile";
 
@@ -6,11 +12,9 @@ export interface LogLoggers {
   [name: string]: LoggerConfig;
 }
 
-
 export interface LogHandlers {
   [name: string]: BaseHandler;
 }
-
 
 export interface FileHandlerOptions extends HandlerOptions {
   filename: string;
