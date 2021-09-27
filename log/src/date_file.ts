@@ -1,12 +1,14 @@
-import { dateToString, handlers, join, LevelName } from "../deps.ts";
-import { FileHandlerOptions } from "./types.ts";
-import { expireDate, mkdir } from "./utils.ts";
+import {dateToString, handlers, join, LevelName} from "../deps.ts";
+import {FileHandlerOptions} from "./types.ts";
+import {expireDate, mkdir} from "./utils.ts";
 
 export class DateFileHandler extends handlers.FileHandler {
   protected _pattern = "yyyy-MM-dd.log";
   protected _daysToKeep = 30;
 
   private originFileName = "";
+
+  protected _flushTimeout = 1000; // 1s refresh once
 
   protected tomorrowDay = 0;
 
@@ -20,6 +22,9 @@ export class DateFileHandler extends handlers.FileHandler {
     }
     if (options.daysToKeep) {
       this._daysToKeep = options.daysToKeep;
+    }
+    if (options.flushTimeout !== undefined) {
+      this._flushTimeout = options.flushTimeout;
     }
     this.init();
   }
@@ -54,7 +59,7 @@ export class DateFileHandler extends handlers.FileHandler {
         if (dirEntryName.startsWith(name) && /\d+/.test(dirEntryName)) {
           if (expiredFileName > dirEntryName) {
             console.log(
-              `[${dirEntryName}]Compared to [${expiredFileName}] has expired and will be deleted soon`,
+                `[${dirEntryName}]Compared to [${expiredFileName}] has expired and will be deleted soon`,
             );
             await Deno.remove(join(dir, dirEntryName));
           }
@@ -70,17 +75,24 @@ export class DateFileHandler extends handlers.FileHandler {
     return filename;
   }
 
+  _log(msg: string): void {
+    super.log(msg);
+    setTimeout(() => {
+      this.flush();
+    }, this._flushTimeout);
+  }
+
   log(msg: string): void {
     if (this.tomorrowDay <= Date.now()) {
       if (!this.initingPromise) {
         this.initingPromise = this.init();
       }
       this.initingPromise.then(() => {
-        super.log(msg);
+        this._log(msg);
         this.initingPromise = undefined;
       });
     } else {
-      super.log(msg);
+      this._log(msg);
     }
   }
 }

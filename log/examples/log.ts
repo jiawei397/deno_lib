@@ -35,3 +35,7 @@ logger2.warning("warning2");
 logger2.warning(2);
 logger2.info("info2"); // will be ignored
 logger2.error("error2");
+
+setTimeout(() => {
+  logger2.error("error3");
+}, 1000);
