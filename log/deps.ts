@@ -1,12 +1,15 @@
 export {
   getLogger as getLoggerOrigin,
   handlers,
+  Logger,
   LoggerConfig,
   LogLevels,
-  Logger,
   setup,
 } from "https://deno.land/std@0.110.0/log/mod.ts";
-export { BaseHandler, WriterHandler } from "https://deno.land/std@0.110.0/log/handlers.ts";
+export {
+  BaseHandler,
+  WriterHandler,
+} from "https://deno.land/std@0.110.0/log/handlers.ts";
 export type { LogRecord } from "https://deno.land/std@0.110.0/log/logger.ts";
 export type {
   HandlerOptions,

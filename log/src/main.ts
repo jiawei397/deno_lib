@@ -1,13 +1,18 @@
 import {
   dateToString,
+  getLoggerOrigin,
   handlers as Handlers,
   LevelName,
   LogRecord,
   setup,
-  getLoggerOrigin,
 } from "../deps.ts";
 import { DateFileHandler } from "./date_file.ts";
-import { DateFileLogConfig, LogHandlers, LogLoggers, MyLogger } from "./types.ts";
+import {
+  DateFileLogConfig,
+  LogHandlers,
+  LogLoggers,
+  MyLogger,
+} from "./types.ts";
 
 export function initLog(config: DateFileLogConfig) {
   const formatter = (logRecord: LogRecord) => {

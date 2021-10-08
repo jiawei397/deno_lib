@@ -6,12 +6,12 @@ import {
   LogLevels,
   LogMode,
   LogRecord,
-  WriterHandler
+  WriterHandler,
 } from "../deps.ts";
-import {FileHandlerOptions} from "./types.ts";
-import {expireDate, mkdir} from "./utils.ts";
+import { FileHandlerOptions } from "./types.ts";
+import { expireDate, mkdir } from "./utils.ts";
 
-export class DateFileHandler extends WriterHandler  {
+export class DateFileHandler extends WriterHandler {
   protected _file: Deno.File | undefined;
   protected _buf!: BufWriterSync;
   protected _mode: LogMode;
@@ -68,7 +68,7 @@ export class DateFileHandler extends WriterHandler  {
     await this.mkdirAndremoveExpiredFiles();
   }
 
-  private async mkdirAndremoveExpiredFiles(){
+  private async mkdirAndremoveExpiredFiles() {
     this.tomorrowDay = this.getTomorrow();
     let name = this.originFileName;
     let dir = "./";
@@ -88,7 +88,7 @@ export class DateFileHandler extends WriterHandler  {
         if (dirEntryName.startsWith(name) && /\d+/.test(dirEntryName)) {
           if (expiredFileName > dirEntryName) {
             console.log(
-                `[${dirEntryName}]Compared to [${expiredFileName}] has expired and will be deleted soon`,
+              `[${dirEntryName}]Compared to [${expiredFileName}] has expired and will be deleted soon`,
             );
             await Deno.remove(join(dir, dirEntryName));
           }
@@ -104,7 +104,7 @@ export class DateFileHandler extends WriterHandler  {
     return filename;
   }
 
-  private async setupBuf(){
+  private async setupBuf() {
     const filename = this.getFilenameByDate(this.originFileName);
     this._file = await Deno.open(filename, this._openOptions);
     this._writer = this._file;
