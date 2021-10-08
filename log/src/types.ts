@@ -39,5 +39,5 @@ export interface DateFileLogConfig {
 }
 
 export type MyLogger = Logger & {
-  warn: (...msg: string[]) => void;
+  warn: (...msg: unknown[]) => unknown;
 };
