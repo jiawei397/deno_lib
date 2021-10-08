@@ -2,6 +2,7 @@ import {
   BaseHandler,
   HandlerOptions,
   LevelName,
+  Logger,
   LoggerConfig,
   LogMode,
 } from "../deps.ts";
@@ -35,4 +36,8 @@ export interface DateFileLogConfig {
       appenders: LogAppender[];
     };
   };
+}
+
+export type MyLogger = Logger & {
+  warn: (...msg: string[]) => void
 }

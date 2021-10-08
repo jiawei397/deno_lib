@@ -4,9 +4,10 @@ import {
   LevelName,
   LogRecord,
   setup,
+  getLoggerOrigin,
 } from "../deps.ts";
 import { DateFileHandler } from "./date_file.ts";
-import { DateFileLogConfig, LogHandlers, LogLoggers } from "./types.ts";
+import { DateFileLogConfig, LogHandlers, LogLoggers, MyLogger } from "./types.ts";
 
 export function initLog(config: DateFileLogConfig) {
   const formatter = (logRecord: LogRecord) => {
@@ -50,4 +51,10 @@ export function initLog(config: DateFileLogConfig) {
     handlers,
     loggers,
   });
+}
+
+export function getLogger(name?: string): MyLogger {
+  const logger = getLoggerOrigin(name) as MyLogger;
+  logger.warn = logger.warning;
+  return logger;
 }

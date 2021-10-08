@@ -1,8 +1,9 @@
 export {
-  getLogger,
+  getLogger as getLoggerOrigin,
   handlers,
   LoggerConfig,
   LogLevels,
+  Logger,
   setup,
 } from "https://deno.land/std@0.110.0/log/mod.ts";
 export { BaseHandler, WriterHandler } from "https://deno.land/std@0.110.0/log/handlers.ts";
