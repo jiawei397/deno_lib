@@ -1,22 +1,48 @@
-import {dateToString, handlers, join, LevelName} from "../deps.ts";
+import {
+  BufWriterSync,
+  dateToString,
+  join,
+  LevelName,
+  LogLevels,
+  LogMode,
+  LogRecord,
+  WriterHandler
+} from "../deps.ts";
 import {FileHandlerOptions} from "./types.ts";
 import {expireDate, mkdir} from "./utils.ts";
 
-export class DateFileHandler extends handlers.FileHandler {
+export class DateFileHandler extends WriterHandler  {
+  protected _file: Deno.File | undefined;
+  protected _buf!: BufWriterSync;
+  protected _mode: LogMode;
+  protected _openOptions: Deno.OpenOptions;
+  protected _encoder = new TextEncoder();
+
   protected _pattern = "yyyy-MM-dd.log";
   protected _daysToKeep = 30;
-
   private originFileName = "";
-
   protected _flushTimeout = 1000; // 1s refresh once
-
   protected tomorrowDay = 0;
-
   private initingPromise: Promise<void> | undefined;
+
+  #unloadCallback() {
+    this.destroy();
+  }
 
   constructor(levelName: LevelName, options: FileHandlerOptions) {
     super(levelName, options);
+    // default to append mode, write only
+    this._mode = options.mode ? options.mode : "a";
+    this._openOptions = {
+      createNew: this._mode === "x",
+      create: this._mode !== "x",
+      append: this._mode === "a",
+      truncate: this._mode !== "a",
+      write: true,
+    };
+
     this.originFileName = options.filename;
+
     if (options.pattern) {
       this._pattern = options.pattern;
     }
@@ -26,7 +52,6 @@ export class DateFileHandler extends handlers.FileHandler {
     if (options.flushTimeout !== undefined) {
       this._flushTimeout = options.flushTimeout;
     }
-    this.init();
   }
 
   getTomorrow() {
@@ -38,8 +63,12 @@ export class DateFileHandler extends handlers.FileHandler {
     return now.getTime();
   }
 
-  async init() {
-    this._filename = this.getFilenameByDate(this.originFileName);
+  private async init() {
+    await this.setupBuf();
+    await this.mkdirAndremoveExpiredFiles();
+  }
+
+  private async mkdirAndremoveExpiredFiles(){
     this.tomorrowDay = this.getTomorrow();
     let name = this.originFileName;
     let dir = "./";
@@ -75,15 +104,50 @@ export class DateFileHandler extends handlers.FileHandler {
     return filename;
   }
 
-  _log(msg: string): void {
-    super.log(msg);
+  private async setupBuf(){
+    const filename = this.getFilenameByDate(this.originFileName);
+    this._file = await Deno.open(filename, this._openOptions);
+    this._writer = this._file;
+    this._buf = new BufWriterSync(this._file);
+  }
+
+  async setup() {
+    await this.init();
+    addEventListener("unload", this.#unloadCallback.bind(this));
+  }
+
+  handle(logRecord: LogRecord): void {
+    super.handle(logRecord);
+
+    // Immediately flush if log level is higher than ERROR
+    if (logRecord.level > LogLevels.ERROR) {
+      this.flush();
+    }
+  }
+
+  flush(): void {
+    if (this._buf?.buffered() > 0) {
+      this._buf.flush();
+    }
+  }
+
+  destroy() {
+    this.flush();
+    this._file?.close();
+    this._file = undefined;
+    removeEventListener("unload", this.#unloadCallback);
+    return Promise.resolve();
+  }
+
+  private _log(msg: string): void {
+    this._buf.writeSync(this._encoder.encode(msg + "\n"));
     setTimeout(() => {
       this.flush();
     }, this._flushTimeout);
   }
 
   log(msg: string): void {
-    if (this.tomorrowDay <= Date.now()) {
+    if (this.tomorrowDay <= Date.now()) { // date changed
       if (!this.initingPromise) {
         this.initingPromise = this.init();
       }
