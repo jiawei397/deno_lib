@@ -226,12 +226,13 @@ export class BaseAjax {
       if (!response.ok) { // 状态码不是200到300，代表请求失败
         if (!(Array.isArray(ignore) && ignore.includes(response.status))) { // 如果不忽略错误码
           const msg = await response.text();
-          this.showMessage(msg || response.statusText, config);
+          const errMsg = msg || response.statusText;
+          this.showMessage(errMsg, config);
           this.handleErrorResponse(response);
           if (isUseOrigin) {
             return response;
           }
-          return Promise.reject(msg);
+          return Promise.reject(errMsg);
         }
       }
       if (isUseOrigin) {
