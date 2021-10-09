@@ -228,7 +228,10 @@ export class BaseAjax {
           const msg = await response.text();
           this.showMessage(msg || response.statusText, config);
           this.handleErrorResponse(response);
-          return Promise.reject(response);
+          if (isUseOrigin) {
+            return response;
+          }
+          return Promise.reject(msg);
         }
       }
       if (isUseOrigin) {
