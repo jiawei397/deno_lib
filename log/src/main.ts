@@ -17,10 +17,9 @@ import {
 export function initLog(config: DateFileLogConfig) {
   const formatter = (logRecord: LogRecord) => {
     const t1 = dateToString("yyyy-MM-dd hh:mm:ss", new Date());
-    // console.log('---', t1);
     let msg = `[${t1}] [${logRecord.levelName}] - ${logRecord.msg}`;
-    logRecord.args.forEach((arg, index) => {
-      msg += `, arg${index}: ${arg}`;
+    logRecord.args.forEach((arg) => {
+      msg += `, ${arg}`;
     });
     return msg;
   };

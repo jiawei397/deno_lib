@@ -24,7 +24,7 @@ await initLog(config);
 
 const logger = getLogger();
 
-logger.warn("warn");
+logger.warn("warn", "msg2", 'msg3');
 logger.warning("warning");
 logger.warning(1);
 logger.info("info");
