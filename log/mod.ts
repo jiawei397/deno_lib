@@ -5,4 +5,3 @@ import type { DateFileLogConfig, LogAppender } from "./src/types.ts";
 
 export type { DateFileLogConfig, LogAppender };
 
-export const version = "0.1.9";

@@ -64,8 +64,8 @@ export class DateFileHandler extends WriterHandler {
   }
 
   private async init() {
-    await this.setupBuf();
     await this.mkdirAndremoveExpiredFiles();
+    await this.setupBuf();
   }
 
   private async mkdirAndremoveExpiredFiles() {
