@@ -1,6 +1,8 @@
 import {
+  cyan,
   dateToString,
   getLoggerOrigin,
+  green,
   handlers as Handlers,
   LevelName,
   LogRecord,
@@ -16,10 +18,10 @@ import {
 
 export function initLog(config: DateFileLogConfig) {
   const formatter = (logRecord: LogRecord) => {
-    const t1 = dateToString("yyyy-MM-dd hh:mm:ss", new Date());
-    let msg = `[${t1}] [${logRecord.levelName}] - ${logRecord.msg}`;
+    const t1 = cyan(dateToString("yyyy-MM-dd hh:mm:ss", new Date()));
+    let msg = `${t1} [${logRecord.levelName}] - ${green(logRecord.msg)}`;
     logRecord.args.forEach((arg) => {
-      msg += `, ${arg}`;
+      msg += `, ${green(arg + "")}`;
     });
     return msg;
   };

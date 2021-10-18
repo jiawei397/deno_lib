@@ -23,3 +23,10 @@ export type {
 export { BufWriterSync } from "https://deno.land/std@0.110.0/io/bufio.ts";
 export { dateToString } from "https://deno.land/x/date_format_deno@v1.1.0/mod.ts";
 export { join } from "https://deno.land/std@0.110.0/path/mod.ts";
+export {
+  bgYellow,
+  blue,
+  cyan,
+  green,
+  yellow,
+} from "https://deno.land/std@0.110.0/fmt/colors.ts";

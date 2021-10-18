@@ -24,14 +24,14 @@ await initLog(config);
 
 const logger = getLogger();
 
-logger.warn("warn", "msg2", 'msg3');
-logger.warning("warning");
+logger.warn("warn", "msg2", "msg3");
+logger.warning("warning1");
 logger.warning(1);
-logger.info("info");
-logger.error("error");
+logger.info("info1");
+logger.error("error1");
 
 const logger2 = getLogger("task");
-logger2.warn("warn");
+logger2.warn("warn2");
 logger2.warning("warning2");
 logger2.warning(2);
 logger2.info("info2"); // will be ignored
