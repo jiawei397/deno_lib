@@ -2,7 +2,6 @@ import {
   cyan,
   dateToString,
   getLoggerOrigin,
-  green,
   handlers as Handlers,
   LevelName,
   LogRecord,
@@ -22,10 +21,10 @@ export const getFormatter = function (needColor: boolean) {
     let msg = `${needColor ? cyan(t1) : t1} [${logRecord.levelName}] - `;
     if (logRecord.args.length > 0) { // if msg is multi, giv first a special color
       msg += `[${needColor ? cyan(logRecord.msg) : logRecord.msg}] ${
-        needColor ? green(logRecord.args.join(", ")) : logRecord.args.join(", ")
+        logRecord.args.join(", ")
       }`;
     } else {
-      msg += needColor ? green(logRecord.msg) : logRecord.msg;
+      msg += logRecord.msg;
     }
     return msg;
   };

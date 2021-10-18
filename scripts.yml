@@ -1,1 +1,5 @@
 version: 0.1.16
+scripts:
+  log:
+    cmd: deno run -A log/examples/log.ts
+    watch: false

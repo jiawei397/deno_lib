@@ -24,6 +24,7 @@ await initLog(config);
 
 const logger = getLogger();
 
+logger.debug("debug1");
 logger.warn("warn", "msg2", "msg3");
 logger.warning("warning1");
 logger.warning(1);
@@ -31,6 +32,7 @@ logger.info("info1");
 logger.error("error1");
 
 const logger2 = getLogger("task");
+logger2.debug("debug2");
 logger2.warn("warn2");
 logger2.warning("warning2");
 logger2.warning(2);
