@@ -16,6 +16,21 @@ import {
   MyLogger,
 } from "./types.ts";
 
+export const getFormatter = function (needColor: boolean) {
+  return function (logRecord: LogRecord) {
+    const t1 = dateToString("yyyy-MM-dd hh:mm:ss", new Date());
+    let msg = `${needColor ? cyan(t1) : t1} [${logRecord.levelName}] - `;
+    if (logRecord.args.length > 0) { // if msg is multi, giv first a special color
+      msg += `[${needColor ? cyan(logRecord.msg) : logRecord.msg}] ${
+        needColor ? green(logRecord.args.join(", ")) : logRecord.args.join(", ")
+      }`;
+    } else {
+      msg += needColor ? green(logRecord.msg) : logRecord.msg;
+    }
+    return msg;
+  };
+};
+
 export function initLog(config: DateFileLogConfig) {
   const loggers: LogLoggers = {};
   const handlers: LogHandlers = {};
@@ -25,29 +40,15 @@ export function initLog(config: DateFileLogConfig) {
 
     if (appenders.includes("console")) {
       if (!handlers.console) {
-        const formatter = (logRecord: LogRecord) => {
-          const t1 = cyan(dateToString("yyyy-MM-dd hh:mm:ss", new Date()));
-          let msg = `${t1} [${logRecord.levelName}] - ${green(logRecord.msg)}`;
-          logRecord.args.forEach((arg) => {
-            msg += `, ${green(arg + "")}`;
-          });
-          return msg;
-        };
+        const formatter = config.consoleFormatter || getFormatter(true);
         handlers.console = new Handlers.ConsoleHandler(level, {
-          formatter,
+          formatter: config.consoleFormatter || formatter,
         });
       }
     }
     if (appenders.includes("dateFile")) {
       if (!handlers.dateFile) {
-        const formatter = (logRecord: LogRecord) => {
-          const t1 = dateToString("yyyy-MM-dd hh:mm:ss", new Date());
-          let msg = `[${t1}] [${logRecord.levelName}] - ${logRecord.msg}`;
-          logRecord.args.forEach((arg) => {
-            msg += `, ${arg}`;
-          });
-          return msg;
-        };
+        const formatter = config.dateFileFormatter || getFormatter(false);
         handlers.dateFile = new DateFileHandler(level, {
           ...config.appenders.dateFile,
           formatter,

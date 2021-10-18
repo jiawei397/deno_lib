@@ -1,7 +1,6 @@
 export * from "./src/date_file.ts";
 export * from "./src/main.ts";
 
-import type { DateFileLogConfig, LogAppender } from "./src/types.ts";
+export type { DateFileLogConfig, Formatter, LogAppender } from "./src/types.ts";
 
-export type { DateFileLogConfig, LogAppender };
-
+export type { LogRecord } from "./deps.ts";

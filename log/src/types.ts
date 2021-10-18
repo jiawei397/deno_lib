@@ -5,6 +5,7 @@ import {
   Logger,
   LoggerConfig,
   LogMode,
+  LogRecord,
 } from "../deps.ts";
 
 export type LogAppender = "console" | "dateFile";
@@ -26,6 +27,8 @@ export interface FileHandlerOptions extends HandlerOptions {
   flushTimeout?: number;
 }
 
+export type Formatter = (logRecord: LogRecord) => string;
+
 export interface DateFileLogConfig {
   appenders: {
     dateFile: FileHandlerOptions;
@@ -36,6 +39,8 @@ export interface DateFileLogConfig {
       appenders: LogAppender[];
     };
   };
+  consoleFormatter?: Formatter;
+  dateFileFormatter?: Formatter;
 }
 
 export type MyLogger = Logger & {
