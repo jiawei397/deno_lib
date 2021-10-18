@@ -17,15 +17,6 @@ import {
 } from "./types.ts";
 
 export function initLog(config: DateFileLogConfig) {
-  const formatter = (logRecord: LogRecord) => {
-    const t1 = cyan(dateToString("yyyy-MM-dd hh:mm:ss", new Date()));
-    let msg = `${t1} [${logRecord.levelName}] - ${green(logRecord.msg)}`;
-    logRecord.args.forEach((arg) => {
-      msg += `, ${green(arg + "")}`;
-    });
-    return msg;
-  };
-
   const loggers: LogLoggers = {};
   const handlers: LogHandlers = {};
   Object.keys(config.categories).forEach((key: string) => {
@@ -34,6 +25,14 @@ export function initLog(config: DateFileLogConfig) {
 
     if (appenders.includes("console")) {
       if (!handlers.console) {
+        const formatter = (logRecord: LogRecord) => {
+          const t1 = cyan(dateToString("yyyy-MM-dd hh:mm:ss", new Date()));
+          let msg = `${t1} [${logRecord.levelName}] - ${green(logRecord.msg)}`;
+          logRecord.args.forEach((arg) => {
+            msg += `, ${green(arg + "")}`;
+          });
+          return msg;
+        };
         handlers.console = new Handlers.ConsoleHandler(level, {
           formatter,
         });
@@ -41,6 +40,14 @@ export function initLog(config: DateFileLogConfig) {
     }
     if (appenders.includes("dateFile")) {
       if (!handlers.dateFile) {
+        const formatter = (logRecord: LogRecord) => {
+          const t1 = dateToString("yyyy-MM-dd hh:mm:ss", new Date());
+          let msg = `[${t1}] [${logRecord.levelName}] - ${logRecord.msg}`;
+          logRecord.args.forEach((arg) => {
+            msg += `, ${arg}`;
+          });
+          return msg;
+        };
         handlers.dateFile = new DateFileHandler(level, {
           ...config.appenders.dateFile,
           formatter,
