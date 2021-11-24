@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 export type Method =
   | "get"
   | "GET"
@@ -70,7 +71,7 @@ export interface RequestConfig {
 }
 
 export interface AjaxExConfig extends RequestConfig {
-  query?: string | Record<string, string | number | boolean | undefined | null>;
+  query?: string | Record<string, any>;
 
   isFile?: boolean; // 是否要传递文件
   isNoAlert?: boolean; // 是否要提示错误信息，默认提示
