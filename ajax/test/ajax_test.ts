@@ -1,7 +1,6 @@
 // Copyright 2018-2021 the oak authors. All rights reserved. MIT license.
-import {assert, assertEquals, assertThrows, describe, it, beforeEach, afterEach, mf} from "./test_deps.ts";
-import {BaseAjax} from "../src/ajax.ts";
-import {ajax} from "../example.ts";
+import { assertEquals, beforeEach, describe, it, mf } from "./test_deps.ts";
+import { BaseAjax } from "../src/ajax.ts";
 
 class Ajax extends BaseAjax {
   /**
@@ -17,18 +16,17 @@ class Ajax extends BaseAjax {
    */
   protected handleErrorResponse(response: Response) {
     console.error(
-        `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
+      `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
     );
   }
 }
 
-function mock(){
+function mock() {
   mf.install();
 
-  mf.mock("GET@/api/", (_req) => {
-    // @ts-ignore
+  mf.mock("GET@/api/", () => {
     return new Response(`ok`, {
-      status: 200
+      status: 200,
     });
   });
 }
@@ -42,7 +40,7 @@ describe("ajax", () => {
     ajax = new Ajax();
   });
 
-  const request = () => ajax.get('http://localhost/api/');
+  const request = () => ajax.get("http://localhost/api/");
 
   describe("request and response count", () => {
     let requestCount = 0;
@@ -70,7 +68,7 @@ describe("ajax", () => {
       });
     });
 
-    it('once', async () => {
+    it("once", async () => {
       assertEquals(requestCount, 0);
       assertEquals(responseCount, 0);
 
@@ -79,7 +77,7 @@ describe("ajax", () => {
       assertEquals(responseCount, 1);
     });
 
-    it('many', async () => {
+    it("many", async () => {
       assertEquals(requestCount, 0);
       assertEquals(responseCount, 0);
 
@@ -92,12 +90,12 @@ describe("ajax", () => {
   });
 
   describe("response count", () => {
-    it('once', async () => {
+    it("once", async () => {
       let count = 0;
       await request().then(() => {
         count++;
       });
       assertEquals(count, 1);
-    })
+    });
   });
 });
