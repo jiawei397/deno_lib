@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   AbortResult,
   AjaxConfig,
@@ -141,7 +142,7 @@ export class BaseAjax {
         baseURL += "/";
       }
       if (url.startsWith("/")) {
-        url = url.substr(1);
+        url = url.substring(1);
       }
       return baseURL + url;
     }
@@ -154,7 +155,7 @@ export class BaseAjax {
       if (isFile) { //文件上传
         const formData = new FormData(); //构造空对象，下面用append方法赋值。
         for (const key in data) {
-          if (!data.hasOwnProperty(key)) {
+          if (!Object.prototype.hasOwnProperty.call(data, key)) {
             continue;
           }
           const value = data[key];
@@ -225,13 +226,13 @@ export class BaseAjax {
       });
       if (!response.ok) { // 状态码不是200到300，代表请求失败
         if (!(Array.isArray(ignore) && ignore.includes(response.status))) { // 如果不忽略错误码
+          if (isUseOrigin) {
+            return Promise.reject(response);
+          }
           const msg = await response.text();
           const errMsg = msg || response.statusText;
           this.showMessage(errMsg, config);
           this.handleErrorResponse(response);
-          if (isUseOrigin) {
-            return response;
-          }
           return Promise.reject(errMsg);
         }
       }
@@ -316,7 +317,7 @@ export class BaseAjax {
    * @param fecthPromise fetch
    * @param controller 取消控制器
    * @param config
-   **/
+   */
   private fetch_timeout(
     fecthPromise: Promise<any>,
     controller: AbortController | undefined,
@@ -324,7 +325,7 @@ export class BaseAjax {
   ) {
     let tp: any;
     const timeout = config.timeout;
-    const abortPromise = new Promise((resolve, reject) => {
+    const abortPromise = new Promise((_resolve, reject) => {
       tp = setTimeout(() => {
         this.abort(controller);
         reject({

@@ -1,14 +1,15 @@
+// deno-lint-ignore-file no-explicit-any
 export function jsonParse(str: any) {
   try {
     return JSON.parse(str);
-  } catch (e) {
+  } catch {
     return str;
   }
 }
 
 export function deleteUndefinedProperty(obj: any) {
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       if (obj[key] === undefined) {
         delete obj[key];
       }
