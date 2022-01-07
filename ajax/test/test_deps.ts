@@ -1,6 +1,7 @@
 export {
   assert,
   assertEquals,
+  assertRejects,
   assertStrictEquals,
   assertThrows,
   assertThrowsAsync,
@@ -16,4 +17,4 @@ export {
 
 import * as mf from "https://deno.land/x/mock_fetch@0.2.0/mod.ts";
 
-export {mf};
+export { mf };

@@ -21,19 +21,19 @@ class Ajax extends BaseAjax {
   }
 }
 
-function mock() {
-  mf.install();
-
-  mf.mock("GET@/api/", () => {
-    return new Response(`ok`, {
-      status: 200,
-    });
-  });
-}
-
-mock();
-
 describe("ajax", () => {
+  function mock() {
+    mf.install();
+
+    mf.mock("GET@/api/", () => {
+      return new Response(`ok`, {
+        status: 200,
+      });
+    });
+  }
+
+  mock();
+
   let ajax: Ajax;
 
   beforeEach(() => {
@@ -97,5 +97,39 @@ describe("ajax", () => {
       });
       assertEquals(count, 1);
     });
+  });
+});
+
+describe("error", () => {
+  function mock() {
+    mf.install();
+
+    mf.mock("POST@/error/", () => {
+      return new Response(`ok`, {
+        status: 401,
+      });
+    });
+
+    mf.mock("GET@/error/", () => {
+      return new Response(`ok`, {
+        status: 401,
+      });
+    });
+  }
+
+  mock();
+
+  it("request and response", async () => {
+    const ajax = new Ajax();
+    const callStacks: number[] = [];
+    await ajax.post("http://localhost/error/").catch(() => {
+      callStacks.push(1);
+    });
+    assertEquals(callStacks, [1]);
+
+    await ajax.get("http://localhost/error/").catch(() => {
+      callStacks.push(2);
+    });
+    assertEquals(callStacks, [1, 2]);
   });
 });
