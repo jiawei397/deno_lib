@@ -1,8 +1,7 @@
-// deno run --unstable --allow-read  demo.ts
-import { render, renderFile } from "https://deno.land/x/deno_ejs/mod.ts";
+import { render, renderFile } from "../mod.ts";
 
 const users = ["geddy", "neil", "alex"];
-let res = render('<p>[?= users.join(" | "); ?]</p>', { users: users }, {
+const res = render('<p>[?= users.join(" | "); ?]</p>', { users: users }, {
   delimiter: "?",
   openDelimiter: "[",
   closeDelimiter: "]",
@@ -11,7 +10,7 @@ let res = render('<p>[?= users.join(" | "); ?]</p>', { users: users }, {
 
 console.log(res);
 
-renderFile(
+const str = await renderFile(
   "./template.ejs",
   {
     title: "from test2",
@@ -19,11 +18,5 @@ renderFile(
     age: 18,
   },
   {},
-  function (err: Error, str: any) {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log(str);
-    }
-  },
 );
+console.log(str);

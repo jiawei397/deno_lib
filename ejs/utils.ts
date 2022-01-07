@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)

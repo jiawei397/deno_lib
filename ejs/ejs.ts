@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 /*
  * EJS Embedded JavaScript templates
  * Copyright 2112 Matthew Eernisse (mde@fleegix.org)
@@ -864,7 +865,7 @@ export class Template {
     var c = this.opts.closeDelimiter;
     var newLineCount = 0;
 
-    newLineCount = (line.split("\n").length - 1);
+    newLineCount = line.split("\n").length - 1;
 
     switch (line) {
       case o + d:
@@ -958,7 +959,7 @@ export class Template {
  * @return {String} Escaped string
  * @public
  * @func
- * */
+ */
 export const escapeXML = utils.escapeXML;
 
 /**
