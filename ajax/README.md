@@ -1,5 +1,8 @@
 # 封装的fetch
 
+[![deno version](https://img.shields.io/badge/deno-^1.16.2-blue?logo=deno)](https://github.com/denoland/deno)
+[![Deno](https://github.com/jiawei397/deno_lib/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno_lib/actions/workflows/deno.yml)
+
 ## 包含功能点
 
 - 同一时间段重复请求会被缓存过滤掉

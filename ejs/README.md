@@ -1,4 +1,7 @@
-Embedded JavaScript templates
+# Embedded JavaScript templates
+
+[![deno version](https://img.shields.io/badge/deno-^1.16.2-blue?logo=deno)](https://github.com/denoland/deno)
+[![Deno](https://github.com/jiawei397/deno_lib/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno_lib/actions/workflows/deno.yml)
 
 forked from ejs, this is for Deno
 
@@ -58,6 +61,7 @@ renderFile(
   <h2><%= user.name %></h2>
 <% } %>
 ```
+
 Try EJS online at: https://ionicabizau.github.io/ejs-playground/.
 
 ```javascript
@@ -220,17 +224,17 @@ Most of EJS will work as expected; however, there are a few things to note:
 2. For the same reason, `include`s do not work unless you use an
    `include callback`. Here is an example:
 
-    ```javascript
-    let str = "Hello <%= include('file', {person: 'John'}); %>",
-      fn = ejs.compile(str, { client: true });
+   ```javascript
+   let str = "Hello <%= include('file', {person: 'John'}); %>",
+     fn = ejs.compile(str, { client: true });
 
-    fn(data, null, function (path, d) { // include callback
-      // path -> 'file'
-      // d -> {person: 'John'}
-      // Put your code here
-      // Return the contents of file as a string
-    }); // returns rendered string
-    ```
+   fn(data, null, function (path, d) { // include callback
+     // path -> 'file'
+     // d -> {person: 'John'}
+     // Put your code here
+     // Return the contents of file as a string
+   }); // returns rendered string
+   ```
 
 See the [examples folder](https://github.com/mde/ejs/tree/master/examples) for
 more details.
