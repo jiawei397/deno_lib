@@ -1,5 +1,5 @@
 // Copyright 2018-2021 the oak authors. All rights reserved. MIT license.
-import { assertEquals, beforeEach, describe, it, mf } from "./test_deps.ts";
+import { assertEquals, beforeEach, describe, it, mf } from "../../test_deps.ts";
 import { BaseAjax } from "../src/ajax.ts";
 
 class Ajax extends BaseAjax {

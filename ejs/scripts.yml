@@ -10,7 +10,7 @@ scripts:
     log: info
     watch: false
   test:
-    cmd: "deno test test/unit.ts"
+    cmd: "deno test"
     allow:
       - read
     unstable: true

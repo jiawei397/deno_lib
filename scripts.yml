@@ -3,3 +3,9 @@ scripts:
   log:
     cmd: deno run -A log/examples/log.ts
     watch: false
+  test:
+    cmd: deno test
+    unstable: true
+    allow:
+      - read
+    watch: false    
