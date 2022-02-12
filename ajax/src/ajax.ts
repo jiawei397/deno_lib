@@ -373,7 +373,7 @@ export class BaseAjax {
         this.clearCacheByKey(uniqueKey, mergedConfig.cacheTimeout);
         return res;
       }, (err) => {
-        this.clearCacheByKey(uniqueKey, mergedConfig.cacheTimeout);
+        this.clearCacheByKey(uniqueKey); // 错误不缓存
         return Promise.reject(err);
       });
       caches.set(uniqueKey, result);
