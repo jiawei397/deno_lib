@@ -13,7 +13,7 @@ import {
   DateFileLogConfig,
   getLogger,
   initLog,
-} from "https://deno.land/x/date_file_log@v0.1.5/mod.ts";
+} from "https://deno.land/x/date_file_log@v0.2.3/mod.ts";
 
 const config: DateFileLogConfig = {
   "appenders": {
