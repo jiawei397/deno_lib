@@ -104,7 +104,7 @@ export class BaseAjax {
     console.error(msg);
   }
 
-  private handleGetUrl(url: string, data: any, isEncodeUrl?: boolean) {
+  private handleGetUrl(url: string, data: AjaxData, isEncodeUrl?: boolean) {
     let tempUrl = url;
     if (typeof data === "object") {
       const exArr = [];

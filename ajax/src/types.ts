@@ -96,7 +96,11 @@ export interface AjaxExConfig extends RequestConfig {
   defaultPutAndPostContentType?: string;
 }
 
-export type AjaxData = any;
+export type AjaxData =
+  | string
+  | Record<string, string | number | boolean>
+  | undefined
+  | null;
 
 export interface AjaxConfig extends AjaxExConfig {
   url: string;

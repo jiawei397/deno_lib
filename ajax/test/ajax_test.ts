@@ -133,3 +133,55 @@ describe("error", () => {
     assertEquals(callStacks, [1, 2]);
   });
 });
+
+describe("error should not cached", () => {
+  const callStacks: number[] = [];
+  function mock() {
+    mf.install();
+
+    mf.mock("GET@/error2/", () => {
+      callStacks.push(2);
+      return new Response(`ok`, {
+        status: 401,
+      });
+    });
+  }
+
+  mock();
+
+  it("not cached", async () => {
+    const ajax = new Ajax();
+
+    await ajax.get("http://localhost/error2/").catch(() => {
+      callStacks.push(1);
+    });
+    assertEquals(callStacks, [2, 1]);
+
+    await ajax.get("http://localhost/error2/").catch(() => {
+      callStacks.push(3);
+    });
+    assertEquals(callStacks, [2, 1, 2, 3], "will not be cached");
+
+    callStacks.length = 0;
+  });
+
+  it("not cached by set cachetimeout", async () => {
+    const ajax = new Ajax();
+
+    await ajax.get("http://localhost/error2/", null, {
+      cacheTimeout: 1000,
+    }).catch(() => {
+      callStacks.push(1);
+    });
+    assertEquals(callStacks, [2, 1]);
+
+    await ajax.get("http://localhost/error2/", null, {
+      cacheTimeout: 1000,
+    }).catch(() => {
+      callStacks.push(3);
+    });
+    assertEquals(callStacks, [2, 1, 2, 3], "will not be cached");
+
+    callStacks.length = 0;
+  });
+});
