@@ -96,11 +96,16 @@ export interface AjaxExConfig extends RequestConfig {
   defaultPutAndPostContentType?: string;
 }
 
-export type AjaxData =
+export type AjaxGetData =
   | string
   | Record<string, string | number | boolean>
   | undefined
   | null;
+
+// deno-lint-ignore ban-types
+export type AjaxPostData = object;
+
+export type AjaxData = AjaxGetData | AjaxPostData;
 
 export interface AjaxConfig extends AjaxExConfig {
   url: string;

@@ -2,8 +2,9 @@
 import {
   AbortResult,
   AjaxConfig,
-  AjaxData,
   AjaxExConfig,
+  AjaxGetData,
+  AjaxPostData,
   AjaxResult,
   ErrorCallback,
   RequestCallback,
@@ -104,7 +105,7 @@ export class BaseAjax {
     console.error(msg);
   }
 
-  private handleGetUrl(url: string, data: AjaxData, isEncodeUrl?: boolean) {
+  private handleGetUrl(url: string, data: AjaxGetData, isEncodeUrl?: boolean) {
     let tempUrl = url;
     if (typeof data === "object") {
       const exArr = [];
@@ -198,7 +199,7 @@ export class BaseAjax {
     let body: any;
     if (method.toUpperCase() === "GET") {
       body = null; //get请求不能有body
-      tempUrl = this.handleGetUrl(tempUrl, data, isEncodeUrl);
+      tempUrl = this.handleGetUrl(tempUrl, data as AjaxGetData, isEncodeUrl);
     } else {
       if (query) {
         tempUrl = this.handleGetUrl(tempUrl, query, isEncodeUrl);
@@ -415,7 +416,7 @@ export class BaseAjax {
     };
   }
 
-  get<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
+  get<T>(url: string, data?: AjaxGetData, options?: AjaxExConfig) {
     return this.ajax<T>({
       url,
       method: "get",
@@ -427,7 +428,7 @@ export class BaseAjax {
   /**
    * 调用ajax的get请求的同时，返回取消ajax请求的方法
    */
-  getAbortResult<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
+  getAbortResult<T>(url: string, data?: AjaxGetData, options?: AjaxExConfig) {
     return this.ajaxAbortResult<T>({
       url,
       method: "get",
@@ -436,7 +437,7 @@ export class BaseAjax {
     });
   }
 
-  post<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
+  post<T>(url: string, data: AjaxPostData, options?: AjaxExConfig) {
     return this.ajax<T>({
       url,
       method: "post",
@@ -448,7 +449,7 @@ export class BaseAjax {
   /**
    * 调用ajax的post请求同时，返回取消ajax请求的方法
    */
-  postAbortResult<T>(url: string, data?: AjaxData, options?: AjaxExConfig) {
+  postAbortResult<T>(url: string, data: AjaxPostData, options?: AjaxExConfig) {
     return this.ajaxAbortResult<T>({
       url,
       method: "post",

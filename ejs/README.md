@@ -8,7 +8,7 @@ forked from ejs, this is for Deno
 ## Example
 
 ```ts
-import { render } from "https://deno.land/x/deno_ejs@v0.2.3/mod.ts";
+import { render } from "https://deno.land/x/deno_ejs@v0.2.5/mod.ts";
 const users = ["geddy", "neil", "alex"];
 let res = render('<p>[?= users.join(" | "); ?]</p>', { users: users }, {
   delimiter: "?",
@@ -21,7 +21,7 @@ console.log(res); // => '<p>geddy | neil | alex</p>'
 or
 
 ```ts
-import { renderFile } from "https://deno.land/x/deno_ejs@v0.2.3/mod.ts";
+import { renderFile } from "https://deno.land/x/deno_ejs@v0.2.5/mod.ts";
 renderFile(
   "./template.ejs",
   {

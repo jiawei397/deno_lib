@@ -122,7 +122,7 @@ describe("error", () => {
   it("request and response", async () => {
     const ajax = new Ajax();
     const callStacks: number[] = [];
-    await ajax.post("http://localhost/error/").catch(() => {
+    await ajax.post("http://localhost/error/", {}).catch(() => {
       callStacks.push(1);
     });
     assertEquals(callStacks, [1]);
