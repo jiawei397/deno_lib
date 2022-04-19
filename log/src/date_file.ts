@@ -12,7 +12,7 @@ import { FileHandlerOptions } from "./types.ts";
 import { expireDate, mkdir } from "./utils.ts";
 
 export class DateFileHandler extends WriterHandler {
-  protected _file: Deno.File | undefined;
+  protected _file: Deno.FsFile | undefined;
   protected _buf!: BufWriterSync;
   protected _mode: LogMode;
   protected _openOptions: Deno.OpenOptions;
