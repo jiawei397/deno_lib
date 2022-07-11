@@ -3,7 +3,10 @@
 [![deno version](https://img.shields.io/badge/deno-^1.16.2-blue?logo=deno)](https://github.com/denoland/deno)
 [![Deno](https://github.com/jiawei397/deno_lib/actions/workflows/deno.yml/badge.svg)](https://github.com/jiawei397/deno_lib/actions/workflows/deno.yml)
 
-forked from ejs, this is for Deno
+forked from ejs, this is for Deno.
+
+> Now the ESM can translate the origin ejs, so this project is no need keep. You
+> can use ejs from: `https://esm.sh/ejs@3.1.8`
 
 ## Example
 
