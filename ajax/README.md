@@ -105,28 +105,32 @@ Type: `any`
 ### timeout
 
 Type: `number`
-<br> Default: `2 * 60 * 1000`，2分钟
+
+Default: `2 * 60 * 1000`，2分钟
 
 过期时间，单位ms。从请求开始，到这个时间如果接口没有响应，则会返回一个失败的promise。
 
 ### timeoutErrorMessage
 
 Type: `string`
-<br> Default: `timeout`
+
+Default: `timeout`
 
 过期时间错误提示
 
 ### timeoutErrorStatus
 
 Type: `number`
-<br> Default: `504`
+
+Default: `504`
 
 过期时间状态码
 
 ### credentials
 
 Type: `string`
-<br> Default: `include`
+
+Default: `include`
 
 - omit：忽略cookie的发送
 - same-origin: 表示cookie只能同域发送，不能跨域发送
@@ -135,7 +139,8 @@ Type: `string`
 ### mode
 
 Type: `string`
-<br> Default: `cors`
+
+Default: `cors`
 
 - same-origin：该模式是不允许跨域的，它需要遵守同源策略，否则浏览器会返回一个error告知不能跨域；其对应的response
   type为basic。
@@ -147,7 +152,8 @@ Type: `string`
 ### stoppedErrorMessage
 
 Type: `string`
-<br> Default: `Ajax has been stopped!`
+
+Default: `Ajax has been stopped!`
 
 当所有ajax停止后，提示错误信息。
 
@@ -201,3 +207,18 @@ Type: `number`
 - 如果是-1，代表不清除缓存。
 - 如果是0，代表不使用缓存。
 - 如果大于0，代表要缓存多长时间，单位是ms。
+
+### originHeaders
+
+Type: `Headers`
+
+如果本身是在接口里进行的二次请求，传递原始的headers
+
+### defaultInjectHeaderKeys
+
+Type: `string[]`
+
+Default:
+`["x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled"]`
+
+配合originHeaders使用，如果有这几个字段，将会默认注入

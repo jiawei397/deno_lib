@@ -39,6 +39,13 @@ export class BaseAjax {
     stoppedErrorMessage: "Ajax has been stopped! ",
     method: "post",
     defaultPutAndPostContentType: "application/json; charset=UTF-8",
+    defaultInjectHeaderKeys: [
+      "x-request-id",
+      "x-b3-traceid",
+      "x-b3-spanid",
+      "x-b3-parentspanid",
+      "x-b3-sampled",
+    ],
   };
 
   public interceptors = {
@@ -192,6 +199,8 @@ export class BaseAjax {
       isEncodeUrl, //get请求时是否要进行浏览器编码
       ignore,
       defaultPutAndPostContentType,
+      defaultInjectHeaderKeys,
+      originHeaders,
       ...otherParams
     } = config;
 
@@ -216,6 +225,14 @@ export class BaseAjax {
           }
         }
       }
+    }
+    if (originHeaders) {
+      defaultInjectHeaderKeys!.forEach((key) => {
+        const value = originHeaders.get(key);
+        if (value) {
+          headers[key] = value;
+        }
+      });
     }
     try {
       const response = await fetch(tempUrl, {
