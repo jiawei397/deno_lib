@@ -40,6 +40,28 @@ Ajax.defaults.baseURL = "/api";
 export const ajax = new Ajax();
 ```
 
+默认在同一时间请求的接口（即还没有响应），会过滤掉，只请求一次。规则是对baseURL、url、method、data、headers作为唯一key，代码如下：
+
+```ts
+protected getUniqueKey(config: AjaxConfig) {
+  const headers = config.headers;
+  const keys = [
+    config.baseURL,
+    config.url,
+    config.method,
+    config.data ? JSON.stringify(config.data) : "",
+  ];
+  if (headers) {
+    Object.keys(headers).forEach((key) =>
+      keys.push(key + "=" + headers[key])
+    );
+  }
+  return md5(keys.filter(Boolean).join("_"));
+}
+```
+
+这个方法可像上面一样重写。
+
 ### 拦截
 
 ```ts

@@ -122,3 +122,10 @@ export type RequestCallback = (config: AjaxConfig) => AjaxConfig;
 export type ErrorCallback = (error: Error) => Promise<Error>;
 
 export type ResponseCallback = (data: any) => Promise<any>;
+
+export type Logger = {
+  debug(...message: any[]): void;
+  info(...message: any[]): void;
+  warn(...message: any[]): void;
+  error(...message: any[]): void;
+};

@@ -1,4 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
+import { encode, Hash } from "../deps.ts";
+
 export function jsonParse(str: any) {
   try {
     return JSON.parse(str);
@@ -15,4 +17,8 @@ export function deleteUndefinedProperty(obj: any) {
       }
     }
   }
+}
+
+export function md5(str: string) {
+  return new Hash("md5").digest(encode(str)).hex();
 }
