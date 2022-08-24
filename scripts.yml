@@ -1,4 +1,4 @@
-version: 0.2.7
+version: 0.2.8
 scripts:
   log:
     cmd: deno run -A log/examples/log.ts
