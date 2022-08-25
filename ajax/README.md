@@ -14,7 +14,7 @@
 ### 封装ajax
 
 ```ts
-import { BaseAjax } from "https://deno.land/x/jw_fetch@v0.2.8/mod.ts";
+import { BaseAjax } from "https://deno.land/x/jw_fetch@v0.3.0/mod.ts";
 
 class Ajax extends BaseAjax {
   /**
