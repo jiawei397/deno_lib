@@ -47,6 +47,7 @@ export class BaseAjax {
       "x-b3-parentspanid",
       "x-b3-sampled",
     ],
+    isNoAlert: true, // default not alert
   };
 
   private logger: Logger;
@@ -112,8 +113,8 @@ export class BaseAjax {
   /**
    * 提示错误，可以配置不提示
    */
-  private showMessage(msg: string, config?: AjaxConfig) {
-    if (config && config.isNoAlert) {
+  private showMessage(msg: string, config: AjaxConfig) {
+    if (config.isNoAlert) {
       return;
     }
     if (!msg) {
@@ -268,7 +269,9 @@ export class BaseAjax {
           const msg = await response.text();
           const errMsg = msg || response.statusText;
           this.showMessage(errMsg, config);
-          this.handleErrorResponse(response);
+          if (config.isNoAlert === false) {
+            this.handleErrorResponse(response);
+          }
           return Promise.reject(errMsg);
         }
       }
@@ -414,7 +417,9 @@ export class BaseAjax {
       });
       caches.set(uniqueKey, result);
     } else {
-      this.logger.debug(`read from cache : ${uniqueKey}`);
+      if (mergedConfig.isDebug) {
+        this.logger.debug(`read from cache : ${uniqueKey}`);
+      }
     }
     return caches.get(uniqueKey);
   }
