@@ -14,26 +14,7 @@
 ### 封装ajax
 
 ```ts
-import { BaseAjax } from "https://deno.land/x/jw_fetch@v0.3.0/mod.ts";
-
-class Ajax extends BaseAjax {
-  /**
-   * 处理消息，具体实现可以覆盖此项
-   */
-  protected handleMessage(msg: string) {
-    console.log("handleMessage", msg);
-    super.handleMessage(msg);
-  }
-
-  /**
-   * 处理错误请求
-   */
-  protected handleErrorResponse(response: Response) {
-    console.error(
-      `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
-    );
-  }
-}
+import Ajax from "https://deno.land/x/jw_fetch@v0.3.1/mod.ts";
 
 Ajax.defaults.baseURL = "/api";
 
