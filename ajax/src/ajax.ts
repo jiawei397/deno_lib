@@ -400,13 +400,57 @@ export class BaseAjax {
    */
   private cache_ajax(cfg: AjaxConfig): AjaxResult {
     const mergedConfig = this.mergeConfig(cfg);
-    const { cacheTimeout } = mergedConfig;
+    const { cacheTimeout, cacheStore, isDebug } = mergedConfig;
     if (cacheTimeout === 0) { // 不缓存结果，也就是说不会过滤掉重复的请求
       return this.core_ajax(mergedConfig);
     }
     const uniqueKey = this.getUniqueKey(mergedConfig);
+
     const caches = this.caches;
-    if (!caches.has(uniqueKey)) {
+    const result = caches.get(uniqueKey);
+    if (result !== undefined) {
+      if (isDebug) {
+        this.logger.debug(`read from cache : ${uniqueKey}`);
+      }
+      return result;
+    }
+    if (cacheStore) { // 有cacheStore，处理要复杂一些，先缓存到内存，等成功后再注入到store中
+      const result: AjaxResult = {
+        promise: Promise.resolve(cacheStore.get(uniqueKey)),
+        config: mergedConfig,
+      };
+      let isGetCachedFromStore = false;
+      result.promise = result.promise.then((res) => {
+        if (res !== undefined && res !== null) {
+          if (isDebug) {
+            this.logger.debug(`read from cacheStore : ${uniqueKey}`);
+          }
+          isGetCachedFromStore = true;
+          return res;
+        }
+        const coreResult = this.core_ajax(mergedConfig);
+        return coreResult.promise;
+      }).then(async (res) => {
+        if (!isGetCachedFromStore) {
+          await cacheStore.set(
+            uniqueKey,
+            res,
+            mergedConfig.cacheTimeout
+              ? {
+                ttl: mergedConfig.cacheTimeout / 1000, // ttl单位设定为秒
+              }
+              : undefined,
+          );
+        }
+        this.clearCacheByKey(uniqueKey); // 成功后在内存中删除
+        return res;
+      }, (err) => {
+        this.clearCacheByKey(uniqueKey); // 错误不缓存
+        return Promise.reject(err);
+      });
+      caches.set(uniqueKey, result);
+      return result;
+    } else {
       const result = this.core_ajax(mergedConfig);
       result.promise = result.promise.then((res) => {
         this.clearCacheByKey(uniqueKey, mergedConfig.cacheTimeout);
@@ -416,12 +460,8 @@ export class BaseAjax {
         return Promise.reject(err);
       });
       caches.set(uniqueKey, result);
-    } else {
-      if (mergedConfig.isDebug) {
-        this.logger.debug(`read from cache : ${uniqueKey}`);
-      }
+      return result;
     }
-    return caches.get(uniqueKey);
   }
 
   private all_ajax(cfg: AjaxConfig): AjaxResult {

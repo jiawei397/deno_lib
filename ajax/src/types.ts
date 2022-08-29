@@ -93,6 +93,9 @@ export interface AjaxExConfig extends RequestConfig {
    */
   cacheTimeout?: number;
 
+  /* 可配置使用localStorage、redis之类数据库进行缓存 */
+  cacheStore?: ICacheStore;
+
   /* 默认put和post的content-type */
   defaultPutAndPostContentType?: string;
   /* 如果本身是在接口里进行的二次请求，传递原始的headers */
@@ -130,3 +133,23 @@ export type Logger = {
   warn(...message: any[]): void;
   error(...message: any[]): void;
 };
+
+export interface ICacheStore {
+  get<T = any>(key: string): Promise<T | undefined> | T | undefined;
+  set(
+    key: string,
+    value: any,
+    options?: {
+      /** ttl should be seconds */
+      ttl: number;
+    },
+  ): Promise<any> | any;
+
+  delete(key: string): Promise<any> | any;
+
+  clear(): Promise<any> | any;
+
+  has(key: string): Promise<boolean> | boolean;
+
+  size(): Promise<number> | number;
+}

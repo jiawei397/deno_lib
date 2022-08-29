@@ -1,6 +1,15 @@
 // Copyright 2018-2021 the oak authors. All rights reserved. MIT license.
-import { assertEquals, beforeEach, describe, it, mf } from "../../test_deps.ts";
+import {
+  assertEquals,
+  beforeEach,
+  delay,
+  describe,
+  it,
+  mf,
+} from "../../test_deps.ts";
+import { ICacheStore } from "../mod.ts";
 import { BaseAjax } from "../src/ajax.ts";
+import { LocalValue } from "../src/store.ts";
 
 class Ajax extends BaseAjax {
   /**
@@ -100,7 +109,7 @@ describe("ajax", () => {
   });
 });
 
-describe("error", () => {
+Deno.test("error", async (it) => {
   function mock() {
     mf.install();
 
@@ -119,7 +128,7 @@ describe("error", () => {
 
   mock();
 
-  it("request and response", async () => {
+  await it.step("request and response", async () => {
     const ajax = new Ajax();
     const callStacks: number[] = [];
     await ajax.post("http://localhost/error/", {}).catch(() => {
@@ -134,7 +143,7 @@ describe("error", () => {
   });
 });
 
-describe("error should not cached", () => {
+Deno.test("error should not cached", async (it) => {
   const callStacks: number[] = [];
   function mock() {
     mf.install();
@@ -149,7 +158,7 @@ describe("error should not cached", () => {
 
   mock();
 
-  it("not cached", async () => {
+  await it.step("not cached", async () => {
     const ajax = new Ajax();
 
     await ajax.get("http://localhost/error2/").catch(() => {
@@ -165,7 +174,7 @@ describe("error should not cached", () => {
     callStacks.length = 0;
   });
 
-  it("not cached by set cachetimeout", async () => {
+  await it.step("not cached by set cachetimeout", async () => {
     const ajax = new Ajax();
 
     await ajax.get("http://localhost/error2/", null, {
@@ -182,6 +191,146 @@ describe("error should not cached", () => {
     });
     assertEquals(callStacks, [2, 1, 2, 3], "will not be cached");
 
+    callStacks.length = 0;
+  });
+});
+
+Deno.test("use cache store", async (it) => {
+  const callStacks: number[] = [];
+  function mock() {
+    mf.install();
+
+    mf.mock("GET@/test", () => {
+      callStacks.push(1);
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(new Response(`ok`));
+        }, 100);
+      });
+    });
+  }
+
+  mock();
+
+  class LocalStore implements ICacheStore {
+    timeoutMap: Map<string, number>;
+
+    constructor() {
+      this.timeoutMap = new Map<string, number>();
+    }
+
+    get(key: string) {
+      callStacks.push(2);
+      const val = localStorage.getItem(key);
+      if (val) {
+        callStacks.push(5);
+        const json = JSON.parse(val) as LocalValue;
+        // console.log("get json", json);
+        if (json.td && Date.now() >= json.td) { // expired
+          callStacks.push(6);
+          // console.debug(`Cache expired: ${key} and will be deleted`);
+          this.delete(key);
+          return;
+        }
+        callStacks.push(7);
+        return json.value;
+      }
+    }
+    set(key: string, value: any, options?: { ttl: number }) {
+      callStacks.push(3);
+      const val: LocalValue = {
+        td: options?.ttl ? Date.now() + options.ttl * 1000 : undefined,
+        value,
+      };
+      localStorage.setItem(key, JSON.stringify(val));
+      if (options?.ttl) {
+        const st = setTimeout(() => {
+          this.delete(key);
+        }, options.ttl * 1000);
+        this.timeoutMap.set(key, st);
+      }
+    }
+    delete(key: string) {
+      callStacks.push(4);
+      localStorage.removeItem(key);
+      clearTimeout(this.timeoutMap.get(key));
+      this.timeoutMap.delete(key);
+    }
+    clear(): void | Promise<void> {
+      localStorage.clear();
+      for (const st of this.timeoutMap.values()) {
+        clearTimeout(st);
+      }
+      this.timeoutMap.clear();
+    }
+    has(key: string): boolean | Promise<boolean> {
+      return localStorage.getItem(key) !== null;
+    }
+    size(): number | Promise<number> {
+      return localStorage.length;
+    }
+  }
+
+  await it.step("cached in memory and push to store", async () => {
+    localStorage.clear();
+    const ajax = new Ajax();
+    const store = new LocalStore();
+    const promise1 = ajax.get("http://localhost/test", null, {
+      cacheStore: store,
+    });
+    const promise2 = ajax.get("http://localhost/test", null, {
+      cacheStore: store,
+    });
+    assertEquals(callStacks, [2]);
+
+    await promise1;
+    await promise2;
+    assertEquals(callStacks, [2, 1, 3]);
+
+    callStacks.length = 0;
+    store.clear();
+  });
+
+  await it.step("get cache from store", async () => {
+    localStorage.clear();
+    const ajax = new Ajax();
+    const store = new LocalStore();
+    const request = () => {
+      return ajax.get("http://localhost/test", null, {
+        cacheStore: store,
+        cacheTimeout: 500,
+      });
+    };
+    const promise1 = request();
+    const promise2 = request();
+    assertEquals(callStacks, [2]);
+
+    await promise1;
+    await promise2;
+    assertEquals(callStacks, [2, 1, 3]);
+
+    callStacks.length = 0;
+
+    {
+      const promise3 = request();
+
+      await promise3;
+      // 这次应该是从store中读取的数据
+      assertEquals(callStacks, [2, 5, 7]);
+      callStacks.length = 0;
+    }
+
+    await delay(1000);
+
+    {
+      await request();
+      // 数据被清除，从store没有读取到数据，这时
+      assertEquals(callStacks, [4, 2, 1, 3]);
+
+      callStacks.length = 0;
+    }
+
+    store.clear();
     callStacks.length = 0;
   });
 });

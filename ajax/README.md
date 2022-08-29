@@ -8,13 +8,14 @@
 - 同一时间段重复请求会被缓存过滤掉
 - timeout
 - 取消请求
+- 支持自定义cache store，比如`localStorage`，也可以是实现了`ICacheStore`接口的数据库
 
 ## 使用
 
 ### 封装ajax
 
 ```ts
-import Ajax from "https://deno.land/x/jw_fetch@v0.3.1/mod.ts";
+import Ajax from "https://deno.land/x/jw_fetch@v0.4.0/mod.ts";
 
 Ajax.defaults.baseURL = "/api";
 
@@ -225,3 +226,68 @@ Default:
 `["x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled"]`
 
 配合originHeaders使用，如果有这几个字段，将会默认注入
+
+### cacheStore
+
+Type: `ICacheStore`
+
+可以参考`src/store.ts`这个文件中的`LocalStore`，数据存储在`localStorage`中。
+
+```typescript
+export interface LocalValue {
+  td: number | undefined;
+  value: any;
+}
+export class LocalStore implements ICacheStore {
+  timeoutMap: Map<string, number>;
+
+  constructor() {
+    this.timeoutMap = new Map<string, number>();
+  }
+
+  get(key: string) {
+    const val = localStorage.getItem(key);
+    if (val) {
+      const json = JSON.parse(val) as LocalValue;
+      // console.log("get json", json);
+      if (json.td && Date.now() >= json.td) { // expired
+        // console.debug(`Cache expired: ${key} and will be deleted`);
+        this.delete(key);
+        return;
+      }
+      return json.value;
+    }
+  }
+  set(key: string, value: any, options?: { ttl: number }) {
+    const val: LocalValue = {
+      td: options?.ttl ? Date.now() + options.ttl * 1000 : undefined,
+      value,
+    };
+    localStorage.setItem(key, JSON.stringify(val));
+    if (options?.ttl) {
+      const st = setTimeout(() => {
+        this.delete(key);
+      }, options.ttl * 1000);
+      this.timeoutMap.set(key, st);
+    }
+  }
+  delete(key: string) {
+    localStorage.removeItem(key);
+    clearTimeout(this.timeoutMap.get(key));
+    this.timeoutMap.delete(key);
+  }
+  clear(): void | Promise<void> {
+    localStorage.clear();
+    for (const st of this.timeoutMap.values()) {
+      clearTimeout(st);
+    }
+    this.timeoutMap.clear();
+  }
+  has(key: string): boolean | Promise<boolean> {
+    return localStorage.getItem(key) !== null;
+  }
+  size(): number | Promise<number> {
+    return localStorage.length;
+  }
+}
+```

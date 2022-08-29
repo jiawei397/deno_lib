@@ -16,6 +16,8 @@ export {
 
 import * as mf from "https://deno.land/x/mock_fetch@0.2.0/mod.ts";
 
+export { delay } from "https://deno.land/x/delay@v0.2.0/mod.ts";
+
 export { mf };
 
 export {
