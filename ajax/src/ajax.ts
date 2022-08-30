@@ -91,6 +91,17 @@ export class BaseAjax {
     return md5(keys.filter(Boolean).join("_"));
   }
 
+  /** 手动清除缓存 */
+  async clearCacheByConfig(cfg: AjaxConfig) {
+    const mergedConfig = this.mergeConfig(cfg);
+    const { cacheStore } = mergedConfig;
+    const uniqueKey = this.getUniqueKey(mergedConfig);
+    if (cacheStore) {
+      await cacheStore.delete(uniqueKey);
+    }
+    this.clearCacheByKey(uniqueKey);
+  }
+
   /**
    * 取消接口请求
    * @param controller 取消控制器
