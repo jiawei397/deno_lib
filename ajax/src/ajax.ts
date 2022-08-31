@@ -416,13 +416,13 @@ export class BaseAjax {
       return this.core_ajax(mergedConfig);
     }
     const uniqueKey = this.getUniqueKey(mergedConfig);
-
     const caches = this.caches;
     const result = caches.get(uniqueKey);
     if (result !== undefined) {
       if (isDebug) {
         this.logger.debug(`read from cache : ${uniqueKey}`);
       }
+      result.isFromMemoryCache = true;
       return result;
     }
     if (cacheStore) { // 有cacheStore，处理要复杂一些，先缓存到内存，等成功后再注入到store中
@@ -430,28 +430,31 @@ export class BaseAjax {
         promise: Promise.resolve(cacheStore.get(uniqueKey)),
         config: mergedConfig,
       };
-      let isGetCachedFromStore = false;
       result.promise = result.promise.then((res) => {
         if (res !== undefined && res !== null) {
           if (isDebug) {
             this.logger.debug(`read from cacheStore : ${uniqueKey}`);
           }
-          isGetCachedFromStore = true;
+          result.isFromStoreCache = true;
           return res;
         }
         const coreResult = this.core_ajax(mergedConfig);
         return coreResult.promise;
       }).then(async (res) => {
-        if (!isGetCachedFromStore) {
-          await cacheStore.set(
-            uniqueKey,
-            res,
-            mergedConfig.cacheTimeout
-              ? {
-                ttl: mergedConfig.cacheTimeout / 1000, // ttl单位设定为秒
-              }
-              : undefined,
-          );
+        if (!result.isFromStoreCache) {
+          try {
+            await cacheStore.set(
+              uniqueKey,
+              res,
+              mergedConfig.cacheTimeout
+                ? {
+                  ttl: mergedConfig.cacheTimeout / 1000, // ttl单位设定为秒
+                }
+                : undefined,
+            );
+          } catch (err) {
+            this.logger.error(`cache set ${uniqueKey} error`, err);
+          }
         }
         this.clearCacheByKey(uniqueKey); // 成功后在内存中删除
         return res;
@@ -475,7 +478,7 @@ export class BaseAjax {
     }
   }
 
-  private all_ajax(cfg: AjaxConfig): AjaxResult {
+  all_ajax(cfg: AjaxConfig): AjaxResult {
     const { isOutStop } = cfg;
     if (!isOutStop && this.isAjaxStopped()) {
       return {

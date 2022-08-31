@@ -1,5 +1,7 @@
+// deno-lint-ignore-file no-explicit-any
 // Copyright 2018-2021 the oak authors. All rights reserved. MIT license.
 import {
+  assert,
   assertEquals,
   beforeEach,
   delay,
@@ -8,27 +10,8 @@ import {
   mf,
 } from "../../test_deps.ts";
 import { ICacheStore } from "../mod.ts";
-import { BaseAjax } from "../src/ajax.ts";
-import { LocalValue } from "../src/store.ts";
-
-class Ajax extends BaseAjax {
-  /**
-   * 处理消息，具体实现可以覆盖此项
-   */
-  protected handleMessage(msg: string) {
-    console.log("handleMessage", msg);
-    super.handleMessage(msg);
-  }
-
-  /**
-   * 处理错误请求
-   */
-  protected handleErrorResponse(response: Response) {
-    console.error(
-      `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
-    );
-  }
-}
+import { BaseAjax as Ajax } from "../src/ajax.ts";
+import { LocalStore, LocalValue } from "../src/store.ts";
 
 describe("ajax", () => {
   function mock() {
@@ -293,6 +276,8 @@ Deno.test("use cache store", async (it) => {
 
   await it.step("get cache from store", async () => {
     localStorage.clear();
+    callStacks.length = 0;
+
     const ajax = new Ajax();
     const store = new LocalStore();
     const request = () => {
@@ -331,6 +316,97 @@ Deno.test("use cache store", async (it) => {
     }
 
     store.clear();
+    callStacks.length = 0;
+  });
+});
+
+Deno.test("isFromCache", async (it) => {
+  const callStacks: number[] = [];
+  function mock() {
+    mf.install();
+
+    mf.mock("GET@/test", () => {
+      callStacks.push(2);
+      return new Response(`ok`);
+    });
+  }
+
+  mock();
+
+  await it.step("no cache", async () => {
+    const ajax = new Ajax();
+
+    const a1 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+    });
+    assertEquals(callStacks, [2]);
+
+    assert(!a1.isFromMemoryCache);
+
+    await a1.promise;
+    assert(!a1.isFromMemoryCache);
+
+    callStacks.length = 0;
+  });
+
+  await it.step("cached from memory", async () => {
+    const ajax = new Ajax();
+
+    const a1 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+    });
+    assertEquals(callStacks, [2]);
+
+    assert(!a1.isFromMemoryCache);
+
+    const a2 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+    });
+    assertEquals(callStacks, [2]);
+    assert(a2.isFromMemoryCache);
+    assert(a1 === a2);
+
+    await a1.promise;
+    await a2.promise;
+    assert(a1 === a2);
+
+    callStacks.length = 0;
+  });
+
+  await it.step("cached from store", async () => {
+    callStacks.length = 0;
+    localStorage.clear();
+
+    const ajax = new Ajax();
+    const store = new LocalStore();
+
+    const a1 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+      cacheStore: store,
+    });
+    assertEquals(callStacks, []);
+    assert(!a1.isFromMemoryCache);
+    assert(!a1.isFromStoreCache);
+    await a1.promise;
+
+    const a2 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+      cacheStore: store,
+    });
+    assertEquals(callStacks, [2]);
+    assert(!a2.isFromMemoryCache);
+    assert(a1 !== a2);
+
+    await a2.promise;
+    assert(a2.isFromStoreCache);
+    assert(!a2.isFromMemoryCache);
+    assert(!a1.isFromStoreCache);
+
     callStacks.length = 0;
   });
 });

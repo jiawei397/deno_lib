@@ -34,6 +34,8 @@ export interface AjaxResult {
   promise: Promise<unknown>;
   config: AjaxConfig;
   controller?: AbortController;
+  isFromMemoryCache?: boolean;
+  isFromStoreCache?: boolean;
 }
 
 export interface RequestConfig {
