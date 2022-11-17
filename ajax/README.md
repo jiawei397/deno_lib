@@ -15,7 +15,7 @@
 ### 封装ajax
 
 ```ts
-import Ajax from "https://deno.land/x/jw_fetch@v0.4.3/mod.ts";
+import Ajax from "https://deno.land/x/jw_fetch@v0.5.0/mod.ts";
 
 Ajax.defaults.baseURL = "/api";
 
