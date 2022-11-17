@@ -10,7 +10,7 @@ import {
   mf,
 } from "../../test_deps.ts";
 import { ICacheStore } from "../mod.ts";
-import { BaseAjax as Ajax } from "../src/ajax.ts";
+import { Ajax } from "../src/ajax.ts";
 import { LocalStore, LocalValue } from "../src/store.ts";
 
 describe("ajax", () => {

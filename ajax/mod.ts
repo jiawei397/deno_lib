@@ -1,4 +1,4 @@
-import { BaseAjax } from "./src/ajax.ts";
+import { Ajax, FetchError } from "./src/ajax.ts";
 
 export * from "./src/utils.ts";
 
@@ -6,5 +6,6 @@ export * from "./src/types.ts";
 
 export * from "./src/store.ts";
 
-export { BaseAjax, BaseAjax as Ajax };
-export default BaseAjax;
+export { Ajax, FetchError };
+
+export default Ajax;

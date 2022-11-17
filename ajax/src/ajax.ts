@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any ban-types
 import {
   AbortResult,
   AjaxConfig,
@@ -13,8 +13,8 @@ import {
 } from "./types.ts";
 import { deleteUndefinedProperty, jsonParse, md5 } from "./utils.ts";
 
-class Interceptors<T> {
-  public chain: any[];
+class Interceptors<T extends Function> {
+  chain: any[];
 
   constructor() {
     this.chain = [];
@@ -30,14 +30,29 @@ class Interceptors<T> {
   }
 }
 
-export class BaseAjax {
+export class FetchError extends Error {
+  status?: number; // status code
+  name = "FetchError";
+  originError?: Error;
+
+  constructor(message: string | Error | undefined, status?: number) {
+    super(message instanceof Error ? message.message : message);
+    if (message instanceof Error) {
+      this.stack = message.stack;
+      this.cause = message.cause;
+      this.originError = message;
+    }
+    this.status = status;
+  }
+}
+
+export class Ajax {
   static defaults: AjaxExConfig = {
     credentials: "include",
     mode: "cors",
     timeout: 1000 * 60 * 2,
     timeoutErrorMessage: "timeout",
     timeoutErrorStatus: 504,
-    stoppedErrorMessage: "Ajax has been stopped! ",
     method: "post",
     defaultPutAndPostContentType: "application/json; charset=UTF-8",
     defaultInjectHeaderKeys: [
@@ -47,7 +62,6 @@ export class BaseAjax {
       "x-b3-parentspanid",
       "x-b3-sampled",
     ],
-    isNoAlert: true, // default not alert
   };
 
   private logger: Logger;
@@ -62,18 +76,6 @@ export class BaseAjax {
   };
 
   public caches = new Map(); // 缓存所有已经请求的Promise，同一时间重复的不再请求
-  private IS_AJAX_STOP = false;
-
-  /**
-   * 停止ajax
-   */
-  stopAjax() {
-    this.IS_AJAX_STOP = true;
-  }
-
-  isAjaxStopped() {
-    return this.IS_AJAX_STOP;
-  }
 
   protected getUniqueKey(config: AjaxConfig) {
     const headers = config.headers;
@@ -115,31 +117,8 @@ export class BaseAjax {
    */
   abortAll() {
     for (const cache of this.caches.values()) {
-      if (!cache.config.isOutStop) { // 如果是要跳出停止处理的，就不能给取消了
-        this.abort(cache.controller);
-      }
+      this.abort(cache.controller);
     }
-  }
-
-  /**
-   * 提示错误，可以配置不提示
-   */
-  private showMessage(msg: string, config: AjaxConfig) {
-    if (config.isNoAlert) {
-      return;
-    }
-    if (!msg) {
-      this.logger.error("No message available");
-      return;
-    }
-    this.handleMessage(msg);
-  }
-
-  /**
-   * 处理消息，具体实现可以覆盖此项
-   */
-  protected handleMessage(msg: string) {
-    this.logger.error(msg);
   }
 
   private handleGetUrl(url: string, data: AjaxGetData, isEncodeUrl?: boolean) {
@@ -279,11 +258,7 @@ export class BaseAjax {
           }
           const msg = await response.text();
           const errMsg = msg || response.statusText;
-          this.showMessage(errMsg, config);
-          if (config.isNoAlert === false) {
-            this.handleErrorResponse(response);
-          }
-          return Promise.reject(errMsg);
+          return Promise.reject(new FetchError(errMsg, response.status));
         }
       }
       if (isUseOrigin) {
@@ -293,21 +268,8 @@ export class BaseAjax {
       const result = await response.text();
       return jsonParse(result);
     } catch (err) { //代表网络异常
-      if (!this.isAbortError(err)) { //不属于主动取消的，需要进行提示
-        this.showMessage(err, config);
-      }
-      return Promise.reject(err);
+      return Promise.reject(new FetchError(err));
     }
-  }
-
-  /**
-   * 处理200-300外的错误状态码的请求
-   * 一般可以在这里处理跳转逻辑
-   */
-  protected handleErrorResponse(response: Response) {
-    this.logger.error(
-      `HTTP error, status = ${response.status}, statusText = ${response.statusText}`,
-    );
   }
 
   isAbortError(err: Error) {
@@ -328,7 +290,7 @@ export class BaseAjax {
 
   private mergeConfig(cfg: AjaxConfig): AjaxConfig {
     deleteUndefinedProperty(cfg);
-    const config = Object.assign({}, BaseAjax.defaults, cfg); // 把默认值覆盖了
+    const config = Object.assign({}, Ajax.defaults, cfg); // 把默认值覆盖了
     const chain = this.interceptors.request.chain;
     for (let i = 0; i < chain.length; i += 2) {
       try {
@@ -378,10 +340,9 @@ export class BaseAjax {
     const abortPromise = new Promise((_resolve, reject) => {
       tp = setTimeout(() => {
         this.abort(controller);
-        reject({
-          code: config.timeoutErrorStatus,
-          message: config.timeoutErrorMessage,
-        });
+        reject(
+          new FetchError(config.timeoutErrorMessage, config.timeoutErrorStatus),
+        );
       }, timeout);
     });
 
@@ -479,13 +440,6 @@ export class BaseAjax {
   }
 
   all_ajax(cfg: AjaxConfig): AjaxResult {
-    const { isOutStop } = cfg;
-    if (!isOutStop && this.isAjaxStopped()) {
-      return {
-        promise: Promise.reject(BaseAjax.defaults.stoppedErrorMessage),
-        config: cfg,
-      };
-    }
     return this.cache_ajax(cfg);
   }
 

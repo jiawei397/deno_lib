@@ -76,11 +76,9 @@ export interface AjaxExConfig extends RequestConfig {
   query?: string | Record<string, any>;
 
   isFile?: boolean; // 是否要传递文件
-  isNoAlert?: boolean; // 是否要提示错误信息，默认不提示
   isDebug?: boolean; // 是否要打印cache信息
   isUseOrigin?: boolean; // 为true时，直接返回response，不再处理结果
   isEncodeUrl?: boolean; //get请求时是否要进行浏览器编码
-  isOutStop?: boolean;
   /**
    * 主动控制取消请求时可传递此参数，或者直接使用ajaxAbortResult方法。例如：
    *
