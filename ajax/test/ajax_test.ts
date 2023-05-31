@@ -376,6 +376,56 @@ Deno.test("isFromCache", async (it) => {
     callStacks.length = 0;
   });
 
+  await it.step("cached from memory, test long time", async () => {
+    const ajax = new Ajax();
+
+    const a1 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+      cacheTimeout: 5_000, // 5s
+    });
+    assertEquals(callStacks, [2]);
+
+    assert(!a1.isFromMemoryCache);
+
+    const a2 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+      cacheTimeout: 5_000, // 5s
+    });
+    assertEquals(callStacks, [2]);
+    assert(a2.isFromMemoryCache);
+    assert(a1 === a2);
+
+    await a1.promise;
+    await a2.promise;
+    assert(a1 === a2);
+
+    await delay(2_000);
+    const a3 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+      cacheTimeout: 5_000, // 5s
+    });
+    assertEquals(callStacks, [2]);
+    assert(a3.isFromMemoryCache);
+    assert(a1 === a3);
+
+    await delay(3_000);
+
+    const a4 = ajax.all_ajax({
+      url: "http://localhost/test",
+      method: "GET",
+      cacheTimeout: 1_000, // 1s
+    });
+    assertEquals(callStacks, [2, 2]);
+    assert(!a4.isFromMemoryCache);
+
+    await delay(1_000);
+
+    callStacks.length = 0;
+  });
+
   await it.step("cached from store", async () => {
     callStacks.length = 0;
     localStorage.clear();
